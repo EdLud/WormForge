@@ -456,6 +456,95 @@
     }
     .empty.show { display: block; }
 
+    /* Verb list view + links between it and the cards. */
+    .verblist[hidden], .grid[hidden], .sort-toggle[hidden] { display: none; }
+    .verblist .lead {
+      margin: 0 0 18px;
+      font: 400 15px/1.55 var(--font-ui);
+      color: var(--muted);
+    }
+    .vsec { margin: 0 0 28px; }
+    .vsec h2 {
+      margin: 0 0 4px;
+      font: 650 19px/1.3 var(--font-ui);
+      color: var(--ink);
+    }
+    .vsec > p {
+      margin: 0 0 10px;
+      font: 400 14px/1.5 var(--font-ui);
+      color: var(--dim);
+    }
+    .vtable {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      font: 400 14px/1.5 var(--font-ui);
+    }
+    .vtable th {
+      text-align: left;
+      padding: 9px 12px;
+      font: 650 12px/1.3 var(--font-ui);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--dim);
+      background: var(--bg-wash);
+      border-bottom: 1px solid var(--border);
+    }
+    .vtable td {
+      padding: 10px 12px;
+      vertical-align: top;
+      border-top: 1px solid var(--border);
+    }
+    .vtable tr:first-child td { border-top: 0; }
+    .vtable td.vsig { width: 34%; }
+    .vtable td.vunits { width: 16%; color: var(--muted); font-size: 13px; }
+    .vtable td.vused { width: 18%; }
+    .vtable td code, .verblist .lead code {
+      padding: 1px 5px;
+      border-radius: 5px;
+      background: var(--code-bg);
+      color: var(--code-ink);
+      font: 450 12.5px/1.5 var(--font-mono);
+      word-break: break-word;
+    }
+    .vtable td.vsig code { font-weight: 550; }
+    .vused a {
+      display: block;
+      color: var(--accent);
+      font: 500 13px/1.45 var(--font-ui);
+      text-decoration: none;
+    }
+    .vused a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .vused .none { color: var(--dim); font-size: 13px; }
+    a.verbref { text-decoration: none; }
+    a.verbref code { cursor: pointer; }
+    a.verbref:hover code {
+      border-color: var(--accent-border);
+      background: var(--accent-soft);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .vtable tr.flash td, .card.flash {
+      animation: flash 1.6s ease-out;
+    }
+    @keyframes flash {
+      0%, 35% { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+      100% { background: transparent; box-shadow: inset 0 0 0 transparent; }
+    }
+    .tab.views { margin-left: 10px; }
+    @media (max-width: 640px) {
+      .vtable, .vtable tbody, .vtable tr, .vtable td { display: block; width: 100% !important; }
+      .vtable thead { display: none; }
+      .vtable td { border-top: 0; padding: 4px 12px; }
+      .vtable tr { border-top: 1px solid var(--border); padding: 6px 0; }
+      .vtable tr:first-child { border-top: 0; }
+    }
+
     .foot {
       margin-top: 36px;
       padding-top: 16px;
@@ -508,6 +597,7 @@
 
     <div class="grid" id="grid"></div>
     <div class="empty" id="empty">No capabilities match this filter. Clear search or pick another category.</div>
+    <div class="verblist" id="verblist" hidden></div>
 
     <p class="foot">
       Built for end users and mod authors ·
@@ -1576,12 +1666,78 @@
       let m;
       while ((m = CODE_TOKEN.exec(raw)) !== null) {
         out += esc(raw.slice(last, m.index));
-        out += `<code>${esc(m[0])}</code>`;
+        out += codeHTML(m[0]);
         last = m.index + m[0].length;
       }
       out += esc(raw.slice(last));
       return out;
     }
+
+    // ---- Verb list: loaded once at page load (data/verbs.json) and kept in
+    // memory, so switching between cards and the list is instant.
+    let VERBS = null;              // the parsed file
+    let verbsError = '';
+    const verbKey = new Map();     // key or alias -> entry key
+    const verbEntry = new Map();   // entry key -> entry
+    const usedIn = new Map();      // entry key -> [capability ids]
+
+    /** The listed verb a code token names, or null: `wa.world.keys().q` ->
+     *  `wa.world.keys`, `wep = "x"` -> `wep`, `worm:hurt(10)` -> `worm:hurt`. */
+    function verbOf(token) {
+      if (!verbKey.size) return null;
+      const m = /^\s*([A-Za-z_]\w*(?:[.:][A-Za-z_]\w*)*)/.exec(String(token));
+      if (!m) return null;
+      const parts = m[1].split(/(?=[.:])/);
+      for (let n = parts.length; n > 0; n--) {
+        const hit = verbKey.get(parts.slice(0, n).join(''));
+        if (hit) return hit;
+      }
+      return null;
+    }
+
+    function codeHTML(token) {
+      const key = verbOf(token);
+      const code = `<code>${esc(token)}</code>`;
+      return key
+        ? `<a class="verbref" href="#verb=${encodeURIComponent(key)}" data-verb="${esc(key)}" title="In the verb list">${code}</a>`
+        : code;
+    }
+
+    function capTokens(cap) {
+      const text = [cap.tagline, ...(cap.details || []), cap.solvedGap || ''].join('\n');
+      const tokens = [...(cap.luaVerbs || [])];
+      CODE_TOKEN.lastIndex = 0;
+      let m;
+      while ((m = CODE_TOKEN.exec(text)) !== null) tokens.push(m[0]);
+      return tokens;
+    }
+
+    function indexVerbs(data) {
+      VERBS = data;
+      for (const sec of data.sections) {
+        for (const v of sec.verbs) {
+          verbEntry.set(v.key, v);
+          verbKey.set(v.key, v.key);
+          for (const a of v.aliases || []) if (!verbKey.has(a)) verbKey.set(a, v.key);
+        }
+      }
+      for (const cap of CAPABILITIES) {
+        const seen = new Set();
+        for (const t of capTokens(cap)) {
+          const key = verbOf(t);
+          if (key && !seen.has(key)) {
+            seen.add(key);
+            if (!usedIn.has(key)) usedIn.set(key, []);
+            usedIn.get(key).push(cap.id);
+          }
+        }
+      }
+    }
+
+    const verbsLoaded = fetch('data/verbs.json')
+      .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then(indexVerbs)
+      .catch((e) => { verbsError = `Couldn't load the verb list (${e.message}).`; });
 
     function pillClass(m) {
       if (m === 'Production') return 'production';
@@ -1617,7 +1773,9 @@
 
     tabsEl.innerHTML = CATEGORIES.map((cat) =>
       `<button type="button" class="tab${cat.id === 'all' ? ' active' : ''}" role="tab" data-id="${esc(cat.id)}" aria-selected="${cat.id === 'all'}">${esc(cat.label)}</button>`
-    ).join('');
+    ).join('') + `<button type="button" class="tab views" role="tab" data-id="verbs" aria-selected="false">All verbs</button>`;
+    const verblist = document.getElementById('verblist');
+    let view = 'matrix';
 
     function parseStamp(raw) {
       if (!raw) return 0;
@@ -1681,13 +1839,13 @@
     }
 
     function renderCard(cap) {
-      const verbs = cap.luaVerbs.map((v) => `<code>${esc(v)}</code>`).join('');
+      const verbs = cap.luaVerbs.map(codeHTML).join('');
       const details = cap.details.map((d) => `<li><span>${decorate(d)}</span></li>`).join('');
       const gap = cap.solvedGap
         ? `<div class="gap">${decorate(cap.solvedGap)}</div>`
         : '';
       return `
-        <article class="card" data-id="${esc(cap.id)}">
+        <article class="card" id="cap-${esc(cap.id)}" data-id="${esc(cap.id)}">
           <div>
             <div class="card-top">
               <h2>${esc(cap.title)}</h2>
@@ -1708,7 +1866,60 @@
         </article>`;
     }
 
+    function verbMatches(v, q) {
+      return !q || [v.key, v.sig, v.desc, v.units, ...(v.aliases || [])].join('\n').toLowerCase().includes(q);
+    }
+
+    function renderVerbs() {
+      if (!VERBS) {
+        verblist.innerHTML = `<p class="lead">${esc(verbsError || 'Loading the verb list…')}</p>`;
+        meta.textContent = '';
+        return;
+      }
+      const q = query.trim().toLowerCase();
+      let shown = 0;
+      let total = 0;
+      const titles = new Map(CAPABILITIES.map((c) => [c.id, c.title]));
+      const secs = VERBS.sections.map((sec) => {
+        total += sec.verbs.length;
+        const rows = sec.verbs.filter((v) => verbMatches(v, q));
+        shown += rows.length;
+        if (!rows.length) return '';
+        const body = rows.map((v) => {
+          const used = (usedIn.get(v.key) || [])
+            .map((id) => `<a href="#cap=${encodeURIComponent(id)}" data-cap="${esc(id)}">${esc(titles.get(id) || id)}</a>`)
+            .join('') || '<span class="none">No card yet</span>';
+          return `<tr id="verb-${esc(v.key)}" data-key="${esc(v.key)}">
+            <td class="vsig"><code>${esc(v.sig)}</code></td>
+            <td>${decorate(v.desc)}</td>
+            <td class="vunits">${esc(v.units || '')}</td>
+            <td class="vused">${used}</td>
+          </tr>`;
+        }).join('');
+        return `<section class="vsec" id="verbs-${esc(sec.id)}">
+          <h2>${esc(sec.title)}</h2>
+          <p>${decorate(sec.lead)}</p>
+          <table class="vtable">
+            <thead><tr><th>Verb</th><th>What it does</th><th>Units</th><th>Used in</th></tr></thead>
+            <tbody>${body}</tbody>
+          </table>
+        </section>`;
+      }).join('');
+      verblist.innerHTML = `<p class="lead">${decorate(VERBS.units)} Engine: ${esc(VERBS.engine)}, <code>api_version = ${esc(VERBS.api_version)}</code>.</p>` + secs;
+      meta.textContent = q ? `Showing ${shown} of ${total} verbs` : `Showing all ${total} verbs`;
+    }
+
     function render() {
+      const matrix = view === 'matrix';
+      grid.hidden = !matrix;
+      verblist.hidden = matrix;
+      sortLatest.hidden = !matrix;
+      search.placeholder = matrix ? 'Search capabilities, hooks, verbs…' : 'Search verbs…';
+      if (!matrix) {
+        empty.classList.remove('show');
+        renderVerbs();
+        return;
+      }
       const list = filtered();
       grid.innerHTML = list.map(renderCard).join('');
       empty.classList.toggle('show', list.length === 0);
@@ -1722,7 +1933,13 @@
     tabsEl.addEventListener('click', (event) => {
       const btn = event.target.closest('.tab');
       if (!btn) return;
-      activeCategory = btn.dataset.id;
+      if (btn.dataset.id === 'verbs') {
+        view = 'verbs';
+      } else {
+        view = 'matrix';
+        activeCategory = btn.dataset.id;
+      }
+      setHash(view === 'verbs' ? 'verbs' : '');
       tabsEl.querySelectorAll('.tab').forEach((el) => {
         const on = el === btn;
         el.classList.toggle('active', on);
@@ -1742,7 +1959,79 @@
       render();
     });
 
+    function selectTab(id) {
+      tabsEl.querySelectorAll('.tab').forEach((el) => {
+        const on = el.dataset.id === id;
+        el.classList.toggle('active', on);
+        el.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+
+    function setHash(h) {
+      const target = h ? `#${h}` : `${location.pathname}${location.search}`;
+      if ((location.hash || '') !== (h ? `#${h}` : '')) history.pushState(null, '', target);
+    }
+
+    function flash(el) {
+      if (!el) return;
+      el.scrollIntoView({ block: 'center', behavior: 'instant' });
+      el.classList.remove('flash');
+      void el.offsetWidth;
+      el.classList.add('flash');
+    }
+
+    function showVerb(key) {
+      view = 'verbs';
+      selectTab('verbs');
+      if (query) { query = ''; search.value = ''; }
+      render();
+      flash(document.getElementById(`verb-${key}`));
+    }
+
+    function showCap(id) {
+      view = 'matrix';
+      activeCategory = 'all';
+      selectTab('all');
+      if (query) { query = ''; search.value = ''; }
+      render();
+      flash(document.getElementById(`cap-${id}`));
+    }
+
+    function follow(hash) {
+      const h = decodeURIComponent(String(hash || '').replace(/^#/, ''));
+      if (h.startsWith('verb=')) {
+        verbsLoaded.then(() => showVerb(h.slice(5)));
+      } else if (h.startsWith('cap=')) {
+        showCap(h.slice(4));
+      } else if (h === 'verbs') {
+        view = 'verbs';
+        selectTab('verbs');
+        render();
+      } else if (view !== 'matrix') {
+        view = 'matrix';
+        selectTab(activeCategory);
+        render();
+      }
+    }
+
+    document.addEventListener('click', (event) => {
+      const link = event.target.closest('a[data-verb], a[data-cap]');
+      if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
+      event.preventDefault();
+      if (link.dataset.verb) {
+        setHash(`verb=${encodeURIComponent(link.dataset.verb)}`);
+        showVerb(link.dataset.verb);
+      } else {
+        setHash(`cap=${encodeURIComponent(link.dataset.cap)}`);
+        showCap(link.dataset.cap);
+      }
+    });
+
+    window.addEventListener('popstate', () => follow(location.hash));
+
     render();
+    // Once the list is in, cards get their verb links and the list its rows.
+    verbsLoaded.then(() => { render(); if (location.hash) follow(location.hash); });
   </script>
 </body>
 </html>
