@@ -665,7 +665,7 @@
       {
         id: 'lua-actor-lifecycle',
         since: '2026-09-22',
-        updated: '2026-10-07T10:30:00Z',
+        updated: '2026-10-11T17:41:00Z',
         release: '0.3',
         category: 'actors',
         title: 'Unified Native LuaActor Architecture',
@@ -675,7 +675,7 @@
           'All custom game entities share ONE native type (LUA_ACTOR_SIZE = 0x154) registered in CollisionManager.',
           'Eliminates dangerous virtual method table (VFT) stacking over stock CWorm or CGObject.',
           'Supports custom state machines, brains, and event loops ticked on stock MSG_FRAME_FINISH.',
-          'Custom orientation, 16.16 fixed-point velocities, and automatic water drowning detection.',
+          'Custom orientation, positions in pixels and speeds in pixels per frame (with fractions), and automatic water drowning detection.',
           'as_object = true puts an actor on WA’s oil-drum collision layer, so fires, guns and blasts hit it and on.hit receives them (Highlander’s Bowling Ball).',
           'shape = "missile" gives an actor WA’s missile collision shape; a:fits(x, y) runs WA’s own collision test at a place.'
         ],
@@ -705,7 +705,7 @@
       {
         id: 'gpu-truecolor-renderer',
         since: '2026-09-22',
-        updated: '2026-10-07T10:45:00Z',
+        updated: '2026-10-11T17:41:00Z',
         release: '0.8',
         category: 'graphics',
         title: 'Direct3D 9 Truecolor Atlas Renderer (EdLud)',
@@ -722,7 +722,7 @@
           'Pack sprites WA must keep in its 256-colour palette (weapon bodies, cluster bits) are drawn from true-colour copies, so a map with a full palette no longer shifts their colours.',
           'Pack quads and ribbons now sort with the sprites by depth, so a quad can sit behind a sprite.'
         ],
-        luaVerbs: ['a:gfx({ angle = 37, scale = 1.2, tint = 0xFF8000, blend = "add", depth = 0x10000 })', 'a:angle(deg)', 'a:scale(s)'],
+        luaVerbs: ['a:gfx({ angle = 37, scale = 1.2, tint = 0xFF8000, blend = "add", depth = wa.depth.FRONT })', 'a:angle(deg)', 'a:scale(s)'],
         exampleMod: 'sentry_gun',
       },
       {
@@ -837,7 +837,7 @@
       {
         id: 'raycast-landscape',
         since: '2026-09-22',
-        updated: '2026-10-07T10:45:00Z',
+        updated: '2026-10-11T17:41:00Z',
         release: '0.8.2',
         category: 'physics',
         title: 'Fast Bitgrid Raycasting & Terrain Tracing',
@@ -847,7 +847,7 @@
           'wa.land.trace(x0, y0, x1, y1) runs Bresenham raycasting through the landscape bitgrid.',
           'Returns unit normal / tangent at the hit (nx ny, tx ty) and starts_solid when the start is already inside land.',
           'Detects line-of-sight obstruction for AI sentries, laser cuts, and hitscan bullet paths.',
-          'wa.land.solid(x, y) tests individual 16.16 fixed coordinates for dirt or air.',
+          'wa.land.solid(x, y) tests a point (in pixels) for dirt or air.',
           'wa.world.electrical_trace / electrical_nearby hit terrain plus worms, mines, crates, oil drums and graves (PX electrical weapons).',
           'wa.world.size() returns exact map boundaries in pixels.',
           'wa.land.stamp{ sprite, frame, x, y } draws a pack frame into the terrain itself, through WA’s own girder routine (the Javelin sticking in the land).'
@@ -1174,7 +1174,7 @@
       {
         id: 'freeform-draw-quads',
         since: '2026-09-27',
-        updated: '2026-09-28T15:40:00Z',
+        updated: '2026-10-11T17:41:00Z',
         release: '0.8.2',
         category: 'graphics',
         title: 'Freeform Draw Pass (wa.on.draw)',
@@ -1182,7 +1182,7 @@
         maturity: 'Production',
         details: [
           'wa.on.draw handlers run once per Present, after the sim frame; wa.draw.quad / wa.draw.ribbon are illegal outside them.',
-          'Each quad takes four { x, y } corners in 16.16 world pixels, optional sprite/frame, color or per-vertex colors, blend, and depth.',
+          'Each quad takes four { x, y } corners in world pixels, optional sprite/frame, color or per-vertex colors, blend, and depth.',
           'wa.draw.ribbon draws one textured strip (Project X pxtexbeam): per-point width, u along the strip, averaged normals so bends stay kink-free.',
           'wa.random is forbidden inside the draw pass so multiplayer peers cannot diverge from render-only code; use wa.draw.random for cosmetic noise.',
           'Composites through the same D3D9 atlas path as actor gfx (sheet must be a GPU sheet).'
@@ -1214,6 +1214,7 @@
       {
         id: 'worm-flight-contact',
         since: '2026-09-27',
+        updated: '2026-10-11T17:41:00Z',
         release: '0.8',
         category: 'worms',
         title: 'Worm Contact & Flight Callbacks',
@@ -1221,7 +1222,7 @@
         maturity: 'Production',
         details: [
           'wa.on.contact(function(worm, other, c) ... end) fires once per contact WA reports.',
-          'c.vx / c.vy are the worm’s speed before impact (16.16); c.flags carry WA’s contact bits.',
+          'c.vx / c.vy are the worm’s speed before impact (pixels per frame); c.flags carry WA’s contact bits.',
           'Supports bounce pads, sticky latch, vehicle boarding, and igniter-style “stay in hand through flight” rules.',
           'Simulation callback — safe for lockstep when decisions go through wa.random / shared state.'
         ],
@@ -1271,11 +1272,11 @@
       {
         id: 'world-gravity-wind',
         since: '2026-09-27',
-        updated: '2026-09-27T21:30:00Z',
+        updated: '2026-10-11T17:41:00Z',
         release: '0.8.1.2',
         category: 'physics',
         title: 'wa.world.gravity() & wa.world.wind()',
-        tagline: 'Read WA’s base gravity and wind (16.16) — Project X Env->Gravity / Env->Wind — before per-object factors.',
+        tagline: 'Read WA’s base gravity and wind (pixels per frame²) — Project X Env->Gravity / Env->Wind — before per-object factors.',
         maturity: 'Production',
         details: [
           'Collision manager +0x22C / +0x230; wind changes each turn.',
@@ -1628,6 +1629,25 @@
         ],
         luaVerbs: ['wa.perf.enable{ ... }', 'wa.on.worm_message(fn, { msgs = { wa.msg.FRAME_FINISH } })'],
         exampleMod: 'stress / perf / highlander',
+      },
+      {
+        id: 'pixel-units',
+        since: '2026-10-11',
+        updated: '2026-10-11T17:41:00Z',
+        category: 'tools',
+        title: 'Pixel Units Across the Lua API (API v2)',
+        tagline: 'Lua speaks pixels: write worm.x + 3, not worm.x + 3 * 0x10000. The engine converts to WA’s 16.16 once.',
+        maturity: 'Live-Accepted',
+        details: [
+          'Positions, distances and sizes are pixels; speeds pixels per frame; world gravity and wind pixels per frame²; worm gravity and wind plain factors (1 = normal). Fractions keep WA’s 1/65536 precision.',
+          'One converter in the Lua host: reads are exact, writes round to the nearest 1/65536 pixel. Verbs and packs never convert by hand.',
+          'Packs declare api_version = 2; version 1 packs are refused, and so are the scripts inside replays recorded with them.',
+          'Draw depths have names: wa.depth.FRONT, EFFECTS, WORMS, OBJECTS, TERRAIN, BEHIND_TERRAIN. Colours stay 0xRRGGBB.',
+          'Deterministic online: simulation callbacks run under fixed float settings, and simulation code uses wa.math for trig.',
+          'Tested in game and online between Wine and Windows on 11 Oct 2026 with no desync.'
+        ],
+        luaVerbs: ['api_version = 2', 'worm.vx = 0.3', 'wa.depth.FRONT', 'wa.math.sin(r)'],
+        exampleMod: 'every example pack; see “All verbs” for each verb’s units',
       },
     ];
 
