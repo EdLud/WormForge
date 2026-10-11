@@ -536,7 +536,15 @@
       0%, 35% { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
       100% { background: transparent; box-shadow: inset 0 0 0 transparent; }
     }
-    .tab.views { margin-left: 10px; }
+    .tab.views {
+      margin-right: 10px;
+      border-color: var(--accent-border);
+      color: var(--accent);
+    }
+    .tab.views.active {
+      color: #fff;
+      border-color: var(--accent);
+    }
     @media (max-width: 640px) {
       .vtable, .vtable tbody, .vtable tr, .vtable td { display: block; width: 100% !important; }
       .vtable thead { display: none; }
@@ -1791,9 +1799,11 @@
     const search = document.getElementById('search');
     const sortLatest = document.getElementById('sort-latest');
 
-    tabsEl.innerHTML = CATEGORIES.map((cat) =>
-      `<button type="button" class="tab${cat.id === 'all' ? ' active' : ''}" role="tab" data-id="${esc(cat.id)}" aria-selected="${cat.id === 'all'}">${esc(cat.label)}</button>`
-    ).join('') + `<button type="button" class="tab views" role="tab" data-id="verbs" aria-selected="false">All verbs</button>`;
+    // The verb list leads the row, so a narrow window never scrolls it out of sight.
+    tabsEl.innerHTML = `<button type="button" class="tab views" role="tab" data-id="verbs" aria-selected="false">Verb list</button>`
+      + CATEGORIES.map((cat) =>
+        `<button type="button" class="tab${cat.id === 'all' ? ' active' : ''}" role="tab" data-id="${esc(cat.id)}" aria-selected="${cat.id === 'all'}">${esc(cat.label)}</button>`
+      ).join('');
     const verblist = document.getElementById('verblist');
     let view = 'matrix';
 
