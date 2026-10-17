@@ -1,7 +1,7 @@
 {
- "engine": "WormForge main, 2026-10-16",
+ "engine": "WormForge 0.9.1, 2026-10-17",
  "api_version": 4,
- "updated": "2026-10-16",
+ "updated": "2026-10-17",
  "units": "Lua speaks pixels: positions and sizes in pixels, speeds in pixels per frame, with fractions. The engine converts to WA's 16.16 once.",
  "sections": [
   {
@@ -76,6 +76,13 @@
      "key": "wa.weapons.panel_icon",
      "sig": "wa.weapons.panel_icon(weapon, n)",
      "desc": "Shows icon n in the weapon's panel tile: 0 its panel_icon, 1 and on its panel_icons. Only the panel changes, so any callback may call it.",
+     "units": "",
+     "aliases": []
+    },
+    {
+     "key": "wa.weapons.set_selectable",
+     "sig": "wa.weapons.set_selectable{ weapon, team, selectable }",
+     "desc": "Whether a team (1 to 6) may select a placed weapon, for now: one it may not is greyed on the panel, can't be picked and is skipped by the F-keys, as WA's delayed weapons are, until it may again. Every round starts with all selectable. Simulation callbacks only. Since 0.9.1.",
      "units": "",
      "aliases": []
     },
