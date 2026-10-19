@@ -1,7 +1,7 @@
 {
  "engine": "WormForge 0.9.1, 2026-10-17",
  "api_version": 4,
- "updated": "2026-10-17",
+ "updated": "2026-10-19",
  "units": "Lua speaks pixels: positions and sizes in pixels, speeds in pixels per frame, with fractions. The engine converts to WA's 16.16 once.",
  "sections": [
   {
@@ -406,6 +406,13 @@
      "aliases": []
     },
     {
+     "key": "worm:jump",
+     "sig": "worm:jump(\"forward\" | \"back\" | \"up\" | \"backflip\")",
+     "desc": "WA's own jump take-off from wherever the worm is; none repeats its last jump.",
+     "units": "",
+     "aliases": []
+    },
+    {
      "key": "worm:carry",
      "sig": "worm:carry(x, y)",
      "desc": "Moves a held worm.",
@@ -515,6 +522,16 @@
      "aliases": [
       "body.hit_by",
       "body.shape"
+     ]
+    },
+    {
+     "key": "a.light",
+     "sig": "a.light = \"projectile\" | false | { kind, mode, circle, cone = { length, width, toward }, shadow_cast, seen_by, discover, strength }",
+     "desc": "The actor's fog-of-war light. A visible world actor has its profile's projectile light by default; invisible (sprite = false), cursor and screen-space actors have none until given one. A preset string (worm, animal, projectile, crate) uses that kind's profile settings; false removes the light; a table replaces the whole spec, and omitted geometry and shadow_cast come from its kind. mode is light (default), dark (shades what its cast sees) or shadow (shades what is hidden from it within reach); darkness wins over light. cone.toward is velocity (default), angle (the a:gfx rotation), facing or degrees. seen_by is owner (default: the owning worm's side, per view_ownership; public without an owning worm) or everyone. discover = true requires seen_by = owner; dark and shadow never record terrain memory. strength (0..255) is for dark and shadow only. Presentation only: any callback may set it. Reading returns the spec table, or false.",
+     "units": "px; degrees",
+     "aliases": [
+      "light",
+      "actor.light"
      ]
     },
     {
@@ -1150,6 +1167,85 @@
      "key": "wa.sound.play",
      "sig": "wa.sound.play(target, sound)",
      "desc": "Plays a sound at a worm, actor or object.",
+     "units": "",
+     "aliases": []
+    }
+   ]
+  },
+  {
+   "id": "fog",
+   "title": "Fog of war",
+   "lead": "Configure the fog of war and place lights, darkness and shadows. The fog is presentation only: it never reaches the simulation, so these may be called from any callback, and each machine may see differently.",
+   "verbs": [
+    {
+     "key": "wa.fog.set",
+     "sig": "wa.fog.set{ circle_radius, cone_width, cone_length, shadow_cast, discover, view_ownership, fog_floor, ... }",
+     "desc": "Replaces the live fog settings, starting from the current ones. Every key is validated first; a bad key or value raises an error naming its range and leaves the fog unchanged. fog_floor = 100 (a fully lit map) turns terrain memory off.",
+     "units": "px; degrees; percent",
+     "aliases": []
+    },
+    {
+     "key": "wa.fog.get",
+     "sig": "wa.fog.get(\"circle_radius\")",
+     "desc": "A fog setting's current value, or nil for an unknown name.",
+     "units": "",
+     "aliases": []
+    },
+    {
+     "key": "wa.fog.defaults",
+     "sig": "wa.fog.defaults()",
+     "desc": "Every fog setting's default, as { name = value }.",
+     "units": "",
+     "aliases": []
+    },
+    {
+     "key": "wa.fog.enable",
+     "sig": "wa.fog.enable(true | false)",
+     "desc": "Turns the fog on or off for the match. Only for packs that declare [fog] in mod.toml.",
+     "units": "",
+     "aliases": []
+    },
+    {
+     "key": "wa.fog.enabled",
+     "sig": "wa.fog.enabled()",
+     "desc": "Whether the fog is on.",
+     "units": "",
+     "aliases": []
+    },
+    {
+     "key": "wa.fog.visible",
+     "sig": "wa.fog.visible(x, y)",
+     "desc": "This machine's brightness at a point, 0..255, including the floor and shade. Draw and HUD callbacks only: local visibility must never steer the simulation.",
+     "units": "px",
+     "aliases": []
+    },
+    {
+     "key": "wa.fog.light",
+     "sig": "wa.fog.light{ x, y, kind, mode, circle, cone = { length, width, toward }, shadow_cast, seen_by, owner, discover, strength, fade }",
+     "desc": "A light without an actor, returning a handle. Same keys as a.light, plus a place, an optional owner worm and fade (milliseconds: the circle closes like a blast's, then the light is removed). Seen by everyone unless owner is given. Its cone needs numeric toward degrees, since it has no heading. At most 64 free lights.",
+     "units": "px; degrees; ms",
+     "aliases": [
+      "fog.light"
+     ]
+    },
+    {
+     "key": "light:move",
+     "sig": "light:move(x, y)",
+     "desc": "Moves a free light.",
+     "units": "px",
+     "aliases": []
+    },
+    {
+     "key": "light:set",
+     "sig": "light:set{ circle, mode, fade, ... }",
+     "desc": "Changes a free light's settings; omitted keys keep their values. A new fade restarts its fade.",
+     "units": "",
+     "aliases": []
+    },
+    {
+     "key": "light:remove",
+     "sig": "light:remove()",
+     "desc": "Removes a free light.",
      "units": "",
      "aliases": []
     }
