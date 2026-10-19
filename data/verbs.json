@@ -478,7 +478,7 @@
     {
      "key": "wa.actors.spawn",
      "sig": "wa.actors.spawn{ sprite, x, y, ... }",
-     "desc": "Creates a Lua actor: a WA collision body the pack controls. Keys: sprite, x, y, from (sky, cursor or owner), origin (center or bottom), owner, gravity, collide, collide_terrain, collide_worms, damage_terrain, damage_worms, drown, persist, visible, loop, shape = \"missile\", as_object, mask and its layer options, on_explode, on = { frame, land, hit }.",
+     "desc": "Creates a native WA actor. body = { shape, hits, hit_by } chooses its outline, outgoing movement and incoming attackers independently. A body uses the oil-drum layer (17). shape is worm (default), missile, sprite (registered sprite frame zero), or a pack-relative image path; a bare image uses no sprite slot and works with sprite=false. hits defaults to {}; hit_by defaults to \"all\". Legacy collide, collide_terrain, collide_worms, as_object, shape, solid and mask options are accepted only without body. Other keys: sprite, x, y, vx, vy, from, origin, owner, gravity, damage_terrain, damage_worms, drown, persist, visible, loop, on_explode, on = { frame, land, hit, contact }.",
      "units": "position px",
      "aliases": [
       "as_object"
@@ -497,6 +497,25 @@
      "desc": "The numeric kind for a pack's actor type name.",
      "units": "",
      "aliases": []
+    },
+    {
+     "key": "a.hits",
+     "sig": "a.hits = { land = true, objects = true }",
+     "desc": "Outgoing movement layers: land, worms (all states), mines, crates, objects (drums and body actors), missiles (native missiles and plain Lua actors). Reads return a boolean table; writes require simulation callbacks. Water is controlled by drown and preserved by writes. WA handles native movement before on.frame.",
+     "units": "",
+     "aliases": [
+      "body.hits"
+     ]
+    },
+    {
+     "key": "a.hit_by",
+     "sig": "a.hit_by = \"all\" | { arrows = true, melee = true }",
+     "desc": "Incoming categories: worms, missiles, arrows, mines, actors, bullets, melee, fire, dragon_ball, blasts. \"all\" allows every category; {} excludes them all. Read/write independently of hits; writes require simulation callbacks and leave the body active for its own physics. Filters narrow stock rules: Prod still cannot push objects and melee tests the target position. Bodies do not catch ninja ropes. Unknown keys are refused.",
+     "units": "",
+     "aliases": [
+      "body.hit_by",
+      "body.shape"
+     ]
     },
     {
      "key": "actor.fields",
