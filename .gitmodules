@@ -1,0 +1,3 @@
+[submodule "catalogue"]
+	path = catalogue
+	url = https://github.com/EdLud/WormForge-mods.git

@@ -1,0 +1,4 @@
+# Download hashes and signatures cover exact bytes on every platform.
+downloads/** -text
+# Content-addressed blobs are opaque payloads, even when they contain Lua/TOML.
+downloads/blobs/??/* -diff -merge
