@@ -22,7 +22,7 @@ Replays and WormNET are supported out of the box. Start from the site, check fea
 
 INSTALL: drop wkLua.dll next to WA.exe
 
-REQUIRES: Wormkit
+REQUIRES: Wormkit, use Direct3D 9 (shader)
 
 </div>
 
