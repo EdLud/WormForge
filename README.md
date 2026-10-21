@@ -10,9 +10,6 @@
 
 <a href="https://github.com/ropahektic/WormForge-engine">Engine Repo</a> 
 
-
-
-
 WormForge is a Lua modding layer for WA 3.8.1 that lets you go past what the game can natively express: custom weapon behaviour, specialist worms and per-worm inventories, panel icons, truecolor sprites (including GIF support) and special effects, hurt rules, and whatever 
 else you can imagine, really.
 
@@ -20,9 +17,11 @@ You don’t need to be a C++ reverse engineer or even a programmer to ship somet
 
 Replays and WormNET are supported out of the box. Start from the site, check features, grab a build, enable an example, and see how far past “just another scheme” you can push a match or improve existing schemes.
 
-INSTALL: drop wkLua.dll next to WA.exe
+INSTALL: Drop wkLua.dll next to WA.exe, Click "Check Online" and "Install". 
 
 REQUIRES: Wormkit, use Direct3D 9 (shader)
+
+STATUS: Stable but replay backwards compability is not yet guaranteed.
 
 </div>
 
