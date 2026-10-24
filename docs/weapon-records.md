@@ -72,10 +72,10 @@ Enum fields accept the names shown below or native integer values.
 | Field | Meaning |
 |---|---|
 | `fires.launch_power_pct` | Missile launch power. `50` is 50%; values above 100 are allowed. `"charged"` or `0` enables charging on launched/thrown weapons. Placement does not become chargeable. |
-| `fires.aims` | Whether WA remembers and may re-equip this weapon between turns. Despite the name, this does not enable the crosshair. |
 | `fires.type`, `fires.method` | Native firing-family and method selectors. Normally inherit them from the base. |
 | `fires.subtype` | Family-dependent native parameter. Selects a special weapon's particular behaviour; no gameplay use has been identified for strikes. Normally inherit it from the base. |
 | `fires.creates_projectile` | Native firing flag. Its detailed effect is not fully documented; inherit it. |
+| `handling.remember_selection` | Whether WA remembers and may re-equip this weapon between turns. Does not enable a crosshair. |
 | `handling.shots` | Number of uses in a firing sequence, such as the Shotgun's two shots. |
 | `handling.ends_turn` | Whether using the weapon ends weapon use for the turn. |
 | `handling.retreat` | Native retreat-time setting in milliseconds; preserve inherited special values unless tested. |
@@ -132,7 +132,7 @@ These groups belong under `missile` and require the matching `action`.
 
 | Group | Fields and meaning |
 |---|---|
-| `bounce` | `bounciness`: extra bounce relative to WA's Grenade (`0`); Banana Bomb uses `60`. `terrain_keep_pct`: percentage of speed retained on terrain contact. `sound`: bounce sound. `max_bounces`: bounce limit; `0` leaves the normal fuse behaviour. |
+| `bounce` | `bounciness`: extra bounce relative to WA's Grenade (`0`); Banana Bomb uses `60`. `terrain_keep_speed_pct`: percentage of speed retained on terrain contact. `sound`: bounce sound. `max_bounces`: bounce limit; `0` leaves the normal fuse behaviour. |
 | `bounce` | `hits`: named targets for physical collisions, added to `ends_on_contact`. `explosion = { bias, push_pct, power, variation }`: the bounce action's contact-explosion parameters. |
 | `bounce` | `contact_sides`: native contact-side bitmask controlling which contacts count toward the bounce limit and trigger contact explosions. Separate from object collision flags. `extra_reverse_chance_pct`: percentage chance of an additional horizontal reversal and a kick based on vertical speed, before normal collision processing. |
 | `homing` | `kind`: `"off"`, `"lock"` or `"dodge"`. `arm`, `time`: arming delay and homing duration in milliseconds. `sprite`, `animation`, `trail = { sprite, power, speed, bubbles_per_second }`: presentation during homing. |
