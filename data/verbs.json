@@ -1,7 +1,7 @@
 {
  "engine": "WormForge 0.9.1, 2026-10-17",
  "api_version": 4,
- "updated": "2026-10-19",
+ "updated": "2026-10-24",
  "units": "Lua speaks pixels: positions and sizes in pixels, speeds in pixels per frame, with fractions. The engine converts to WA's 16.16 once.",
  "sections": [
   {
@@ -271,6 +271,17 @@
      "units": "",
      "aliases": [
       "cursor_sprite"
+     ]
+    },
+    {
+     "key": "data.cursor",
+     "sig": "cursor = { flip = true, dy = 20 }",
+     "desc": "WA's team cursor while the weapon aims: drawn upside down and dy pixels lower, for this weapon only, as Project X's Submarine Attack draws it.",
+     "units": "dy px",
+     "aliases": [
+      "cursor",
+      "cursor.flip",
+      "cursor.dy"
      ]
     },
     {
@@ -718,6 +729,29 @@
      "aliases": []
     },
     {
+     "key": "wa.mines.spawn",
+     "sig": "wa.mines.spawn{ owner, x, y, vx, vy, fuse, arm, damage, radius, dud_proof }",
+     "desc": "Builds one of WA's mines, as Project X's new CMine: WA flies, arms, triggers and explodes it as its own. A worm owner's team lays it; an actor's mine is the map's.",
+     "units": "position px · speed px/frame · fuse, arm ms · radius px",
+     "aliases": []
+    },
+    {
+     "key": "wa.arrows.spawn",
+     "sig": "wa.arrows.spawn{ owner, x, y, vx, vy, damage, gravity_pct }",
+     "desc": "Builds one of WA's arrows, as Project X's new CArrow; nil when WA makes none (its object pool full, or inside land).",
+     "units": "position px · speed px/frame",
+     "aliases": []
+    },
+    {
+     "key": "wa.oil.spawn",
+     "sig": "wa.oil.spawn{ x, y, snap = true }",
+     "desc": "Builds one of WA's oil drums, as the level's hazardous objects are made. snap drops it until it lands; snap = false starts it where it is put.",
+     "units": "position px",
+     "aliases": [
+      "wa.oil.all"
+     ]
+    },
+    {
      "key": "wa.fire.spawn",
      "sig": "wa.fire.spawn{ owner, x, y, vx, vy, count, duration, damage, up_power, damage_scale, knock_scale, tint }",
      "desc": "Starts one of WA's fires.",
@@ -737,7 +771,7 @@
     {
      "key": "object.fields",
      "sig": "Object fields",
-     "desc": "x, y, vx, vy read and write; id, uid, kind, team, alliance read only; fuse on mines, worm_id on graves.",
+     "desc": "x, y, vx, vy read and write; id, uid, kind, team, alliance read only; fuse on mines, worm_id on graves; damage and max_damage on oil drums, and visible (false: WA stops drawing that drum, so a pack can draw its own).",
      "units": "x, y px · vx, vy px/frame · fuse ms",
      "aliases": [
       "object.x",
@@ -750,7 +784,10 @@
       "object.team",
       "object.alliance",
       "mine.fuse",
-      "grave.worm_id"
+      "grave.worm_id",
+      "drum.damage",
+      "drum.max_damage",
+      "drum.visible"
      ]
     },
     {
@@ -871,12 +908,13 @@
     },
     {
      "key": "wa.world.retreat",
-     "sig": "wa.world.retreat() / wa.world.turn_clock() / wa.world.set_turn_clock(ms)",
-     "desc": "Retreat countdown and turn clock left; set_turn_clock sets the turn clock (simulation only).",
+     "sig": "wa.world.retreat() / wa.world.set_retreat(ms) / wa.world.turn_clock() / wa.world.set_turn_clock(ms)",
+     "desc": "Retreat countdown and turn clock left; set_retreat changes a running retreat only and returns whether it applied, set_turn_clock sets the turn clock (simulation only).",
      "units": "ms",
      "aliases": [
       "wa.world.turn_clock",
-      "wa.world.set_turn_clock"
+      "wa.world.set_turn_clock",
+      "wa.world.set_retreat"
      ]
     },
     {
@@ -933,6 +971,22 @@
      "sig": "wa.world.electrical_nearby(x, y, radius, graves)",
      "desc": "The objects an arc can strike within a radius.",
      "units": "px",
+     "aliases": []
+    },
+    {
+     "key": "wa.magnetism.field",
+     "sig": "wa.magnetism.field{ source = actor, ... }",
+     "desc": "Registers a match-wide magnetic field on an actor; fields sum across packs from one simulation-step snapshot and disappear with their source. Actors opt in with magnetic = 1.",
+     "units": "px",
+     "aliases": [
+      "magnetic"
+     ]
+    },
+    {
+     "key": "wa.magnetism.sample",
+     "sig": "wa.magnetism.sample(x, y [, actor])",
+     "desc": "The fields' force at a point, for custom movement; with an actor, as that actor feels it. Point-only sampling is read-only.",
+     "units": "position px",
      "aliases": []
     },
     {
@@ -1073,6 +1127,17 @@
      "desc": "After a worm gets weapons (crate, inventory or script).",
      "units": "",
      "aliases": []
+    },
+    {
+     "key": "wa.on.oil_explode",
+     "sig": "wa.on.oil_explode(fn)",
+     "desc": "When WA is about to blow up an oil drum, in the simulation. ev:replace() stands in for WA's blast, fires and sound, as Project X's COilDrum::Explosion; WA frees the drum either way.",
+     "units": "ev.x, ev.y px",
+     "aliases": [
+      "ev.drum",
+      "ev.team",
+      "ev:replace"
+     ]
     },
     {
      "key": "wa.on.draw",
