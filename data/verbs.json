@@ -265,6 +265,15 @@
      ]
     },
     {
+     "key": "data.placement_range",
+     "sig": "placement_range = 300",
+     "desc": "While the worm aims it, WA's cursor is held within this many pixels of the worm, as Project X's girder restrictor holds Highlander's girders. A weapon's own option may set it: an int option with data = true is the weapon data field of its key.",
+     "units": "px",
+     "aliases": [
+      "placement_range"
+     ]
+    },
+    {
      "key": "data.cursor_sprite",
      "sig": "cursor_sprite = \"<WA sprite>\"",
      "desc": "One of WA's sprites drawn at the cursor while aiming, as WA draws the worm where its Teleport would land.",
