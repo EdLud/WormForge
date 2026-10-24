@@ -346,7 +346,7 @@
     {
      "key": "worm.readonly",
      "sig": "Worm fields (read only)",
-     "desc": "id, team, alliance, ammo_group, hp, kind, weapon (its id), turn, aim, aiming, drilling, state (standing, prefiring, punching, drilling, teleporting, jetpacking, parachuting, sliding, bungee, tumbling, frozen, kamikaze, jump_prepare, jumping, blasted, hit; nil for any other WA state), state_id, state_label, keys, taken.",
+     "desc": "id, team, alliance, ammo_group, hp, kind, weapon (its id), turn, aim, aiming, drilling, state (standing, prefiring, firing, fired, punching, drilling, teleporting, jetpacking, parachuting, sliding, bungee, tumbling, frozen, kamikaze, jump_prepare, jumping, blasted, hit; nil for any other WA state), state_id, state_label, keys, taken.",
      "units": "aim 0 (down) to 1 (up)",
      "aliases": [
       "worm.aim",
