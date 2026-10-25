@@ -310,6 +310,15 @@
      "aliases": [
       "aims_straight_up"
      ]
+    },
+    {
+     "key": "data.collects_crates",
+     "sig": "collects_crates = false",
+     "desc": "Its missiles leave crates where they are. WA's missile picks up any crate it reaches for the firing team, whatever it collides with; with bounce.hits.crates in its record it bounces off them instead, as Project X's Burning Sheep Launcher does. Left out, WA's.",
+     "units": "",
+     "aliases": [
+      "collects_crates"
+     ]
     }
    ]
   },
