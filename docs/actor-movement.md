@@ -30,9 +30,6 @@ under its feet. It does not stop at land, bounce or meet worms.
 
 On an actor WA already moves, `a:move()` is a second step on top of WA's: the
 actor goes twice as fast, and that second step can push it into land.
-reddaz's Keeper Bee did this in its first port: after removing `a:move()` and
-doubling its speed numbers it flew the same, with WA alone stopping it at
-walls.
 
 Use `a:move()` only for actors WA doesn't move (the third row above).
 
