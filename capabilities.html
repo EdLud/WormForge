@@ -986,15 +986,15 @@
       {
         id: 'mod-loader-gui',
         since: '2026-09-24',
-        updated: '2026-10-17T15:00:00Z',
+        updated: '2026-10-25T09:00:00Z',
         release: '0.7',
         category: 'tools',
         title: 'Win32 Companion Mod Loader Window',
         tagline: 'In-game UI to pick a profile and its weapons, and download new mods from the web.',
         maturity: 'Production',
         details: [
-          'Native Win32 window on its own thread beside WA, with Profile, Weapons and .wsc tabs: the profile, its weapons on WA’s panel with their settings, and the scheme.',
-          'The installed mods are listed under the profile; their add-ons and weapons are picked there. No slot conflicts: a profile places each weapon by id, and every weapon that isn’t WA’s own gets its own slot past 70.',
+          'Native Win32 window on its own thread beside WA. Its main view is the profile and a card for each mod; Manage Weapon Panel and Manage Scheme (.WSC) open the profile’s weapons on WA’s panel, with their settings, and the scheme.',
+          'A mod has no on/off: what is installed is available and the profile picks. A click on a mod’s card opens its add-ons, each ticked on its own, with its settings. Weapons are placed on the panel page. No slot conflicts: a profile places each weapon by id, and every weapon that isn’t WA’s own gets its own slot past 70.',
           'Check online reads the signed catalogue, lists mods to install and marks mods with an update in red; Update all installs them, each zip checked against its SHA-256.',
           'It opens again, or comes to the front, when a replay needs files, and shows their download.',
           'Wine-safe writes: WormForge/wormforge.toml and saved profiles are replaced, never rewritten in place.'
@@ -1705,7 +1705,7 @@
         maturity: 'Live-Accepted',
         details: [
           'The profile’s [scheme] holds every game option, the extended 3.8 options included, and [weapon_settings] every WA weapon’s ammo, power, delay and crate share. Anything left out takes WA’s Intermediate value.',
-          'The loader’s .wsc tab lists the options in groups, with search; WA’s lobby scheme editor is untouched.',
+          'The loader’s scheme page (Manage Scheme) lists the options as cards in groups, with search and a step on each number; WA’s lobby scheme editor is untouched.',
           'Before WA’s session starts the engine hands it the profile’s full version 3 scheme, so WA’s own setup, replay recording and settings read later in the match all see it.',
           'wsc-to-profile bakes a .wsc into profile settings; no .wsc ships with WormForge.'
         ],
