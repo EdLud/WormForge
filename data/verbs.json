@@ -505,7 +505,7 @@
     {
      "key": "wa.actors.spawn",
      "sig": "wa.actors.spawn{ sprite, x, y, ... }",
-     "desc": "Creates a native WA actor. body = { shape, hits, hit_by } chooses its outline, outgoing movement and incoming attackers independently. A body uses the oil-drum layer (17). shape is worm (default), missile, sprite (registered sprite frame zero), or a pack-relative image path; a bare image uses no sprite slot and works with sprite=false. hits defaults to {}; hit_by defaults to \"all\". Legacy collide, collide_terrain, collide_worms, as_object, shape, solid and mask options are accepted only without body. Other keys: sprite, x, y, vx, vy, from, origin, owner, gravity, damage_terrain, damage_worms, drown, persist, visible, loop, on_explode, on = { frame, land, hit, contact }.",
+     "desc": "Creates a native WA actor. body = { shape, hits, hit_by } chooses its outline, outgoing movement and incoming attackers independently. A body uses the oil-drum layer (17). shape is worm (default), missile, sprite (registered sprite frame zero), or a pack-relative image path; a bare image uses no sprite slot and works with sprite=false. hits defaults to {}; hit_by defaults to \"all\". Legacy collide, collide_terrain, collide_worms, as_object, shape, solid and mask options are accepted only without body. Other keys: sprite, x, y, vx, vy, from, origin, owner, gravity, damage_terrain, damage_worms, drown, persist, visible, loop, on_explode, on = { frame, land, hit, contact, bump }.",
      "units": "position px",
      "aliases": [
       "as_object"
@@ -580,7 +580,7 @@
     {
      "key": "a:move",
      "sig": "a:move{ terrain, worms }",
-     "desc": "Moves by its speed against terrain and worms, and returns what it hit.",
+     "desc": "Adds its speed to its position once and reports land under its feet (terrain, land, left). It is not WA's sweep: it does not stop at land, bounce or meet worms, and produces no bumps.",
      "units": "",
      "aliases": []
     },
@@ -597,6 +597,24 @@
      "desc": "WA's collision test of its shape at a place.",
      "units": "px",
      "aliases": []
+    },
+    {
+     "key": "on.contact",
+     "sig": "on = { contact = function(a, ev) end }",
+     "desc": "Something moving ran into this actor (WA's own movement): ev.other, ev.x, ev.y, ev.vx, ev.vy (its speed going in), ev.nx, ev.ny (the side), ev.frame. After physics, once per pair a frame; Lua decides the push.",
+     "units": "px, px/frame",
+     "aliases": []
+    },
+    {
+     "key": "on.bump",
+     "sig": "on = { bump = function(a, ev) end }",
+     "desc": "This actor's own movement ran into something, stopped by WA's sweep: ev.other (\"land\" or the worm/object/actor), ev.nx, ev.ny (the side, pointing away), ev.surface_nx, ev.surface_ny (on a land floor only: its slope, from WA's own gradient), ev.vx, ev.vy (speed going in), ev.x, ev.y, ev.first (not touching it the frame before), ev.frame. After physics, in lifetime order; WA's stop or bounce is already in a.vx, a.vy, write them to steer. Needs an actor that collides with something.",
+     "units": "px, px/frame",
+     "aliases": [
+      "bump",
+      "ev.surface_nx",
+      "ev.surface_ny"
+     ]
     },
     {
      "key": "a:collision_ignore",
