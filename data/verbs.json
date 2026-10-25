@@ -222,10 +222,19 @@
     {
      "key": "data.shots",
      "sig": "shots = n",
-     "desc": "Shots per use; mid-air each fire press fires the next.",
+     "desc": "Shots per use, 1 to 9; mid-air each fire press fires the next. The Ninja Rope's are its own: 1 to 127 rope shots per use, or -1 unlimited.",
      "units": "",
      "aliases": [
       "shots"
+     ]
+    },
+    {
+     "key": "data.rope_length",
+     "sig": "rope_length = 200",
+     "desc": "The Ninja Rope's maximum length in pixels, up to 535. Unset, the rope's scheme power gives it, with its shots: power 0 one shot of 147 px, 1 two of 168, 2 two of 189, 3 four of 210, more unlimited of 231.",
+     "units": "px",
+     "aliases": [
+      "rope_length"
      ]
     },
     {
