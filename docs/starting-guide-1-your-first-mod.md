@@ -18,7 +18,7 @@ The short version:
 - Nothing in a mod runs by itself. A **profile** picks the weapons and
   features a game uses, and where each weapon sits on the panel.
 - A weapon's file returns its data and an `install` function, which builds
-  the weapon on one of WA's own:
+  the weapon copying the behaviour of a WA weapon:
   `wa.weapons.replace{ copy_from = "stock.grenade", ... }`.
 - Put your mod beside `wf-lib`, never inside it.
 - Your files are read again at every match start: edit, save, start a new
