@@ -1,0 +1,50 @@
+id = "wf.sdk"
+name = "WormForge shared helpers"
+version = "0.2.0"
+author = "WormForge / Project X authors"
+api_version = 4
+format_version = 2
+asset_namespace = "wf-lib/px"
+
+[sprites."sprites/px_hold/aim.png"]
+fps = 15
+play = "loop"
+
+[sprites."sprites/px_hold/aimu.png"]
+fps = 15
+play = "loop"
+
+[sprites."sprites/px_hold/aimd.png"]
+fps = 15
+play = "loop"
+
+[sprites."sprites/px_hold/draw.png"]
+fps = 15
+play = "loop"
+
+[sprites."sprites/px_hold/drawu.png"]
+fps = 15
+play = "loop"
+
+[sprites."sprites/px_hold/drawd.png"]
+fps = 15
+play = "loop"
+
+[sprites."sprites/px_hold/hand_rad_lower.png"]
+fps = 15
+play = "loop"
+
+[sprites."sprites/px_hold/hand_rad.png"]
+fps = 15
+play = "loop"
+
+[sprites."sprites/px_hold/hand_rad_upper.png"]
+fps = 15
+play = "loop"
+[exports]
+"wf-lib/shared" = "shared.lua"
+"wf-lib/px_sprite_builder" = "px_sprite_builder.lua"
+"wf-lib/holds" = "holds.lua"
+"wf-lib/parkour" = "parkour.lua"
+"wf-lib/tooltip" = "tooltip.lua"
+
