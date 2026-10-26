@@ -923,7 +923,7 @@
     {
      "key": "object:remove",
      "sig": "object:remove()",
-     "desc": "Frees a missile or mine without a blast.",
+     "desc": "Frees a missile, arrow, mine or oil drum without a blast: a drum goes with no fires and no wa.on.oil_explode. Returns whether it did. Simulation callbacks only.",
      "units": "",
      "aliases": []
     },
