@@ -1333,6 +1333,45 @@
      "aliases": []
     },
     {
+     "key": "wa.hud.message_top",
+     "sig": "wa.hud.message_top(text, { to, alliance })",
+     "desc": "WA's top-centre banner, as selecting a weapon shows it: one line of at most 127 bytes. to is \"all\" (default), \"active\" (the player whose turn it is) or \"coalition\" (the active team's, or alliance 0-5). Call from simulation events.",
+     "units": "",
+     "aliases": [
+      "message_top"
+     ]
+    },
+    {
+     "key": "wa.hud.window",
+     "sig": "wa.hud.window{ text | lines, x, y, align, font, color, border, max_width, to, alliance, over_panel }",
+     "desc": "A text window in WA's own fonts and box style, sized to its text, open until closed or the match ends; returns a handle. text takes \\n line breaks; lines = { \"a\", { \"b\", color = \"yellow\" } } colours lines. font: small, standard (the round timer's) or medium. color and border: white, grey, red, blue, green, yellow, purple, cyan; border \"none\". max_width wraps at spaces. align names the box's and the screen's point x, y offset it from (top_left ... bottom_right, center). to / alliance as message_top, taken when given. Fades out while the weapon panel is open unless over_panel = true. Drawn over WA's HUD on the GPU layer (Direct3D 9 shader). At most 32 open.",
+     "units": "px",
+     "aliases": [
+      "hud.window"
+     ]
+    },
+    {
+     "key": "window:set",
+     "sig": "window:set{ text, x, color, ... }",
+     "desc": "Changes a window; omitted keys keep their values. False once it is closed.",
+     "units": "",
+     "aliases": []
+    },
+    {
+     "key": "window:close",
+     "sig": "window:close()",
+     "desc": "Closes a window; false if it already was.",
+     "units": "",
+     "aliases": []
+    },
+    {
+     "key": "window:is_open",
+     "sig": "window:is_open()",
+     "desc": "Whether the window is still open: the same on every machine.",
+     "units": "",
+     "aliases": []
+    },
+    {
      "key": "wa.sprites.key",
      "sig": "wa.sprites.key(name)",
      "desc": "Resolves a pack sprite name once, for reuse in draw calls.",
