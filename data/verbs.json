@@ -337,6 +337,15 @@
      "aliases": [
       "collects_crates"
      ]
+    },
+    {
+     "key": "data.ends_invisibility",
+     "sig": "ends_invisibility = true | false",
+     "desc": "Whether using it ends Invisibility: the team's, and the firing worm's own worm.invisibility. Left out, WA's answer: its record creates a projectile (attacking weapons end it; the rope, Girder, Teleport, Prod, Freeze, Jet Pack and the utilities don't).",
+     "units": "",
+     "aliases": [
+      "ends_invisibility"
+     ]
     }
    ]
   },
@@ -369,7 +378,7 @@
     {
      "key": "worm.fields",
      "sig": "Worm fields (read and write)",
-     "desc": "x, y, vx, vy, facing, visible, body_visible, collision_mask, fuel, gravity, wind, windup, shots_fired, shots_to_fire, name (writes, from simulation callbacks, keep the first 16 printable ASCII bytes and change the native name and label; id and the saved team stay).",
+     "desc": "x, y, vx, vy, facing, visible, body_visible, collision_mask, fuel, gravity, wind, windup, shots_fired, shots_to_fire, name (writes, from simulation callbacks, keep the first 16 printable ASCII bytes and change the native name and label; id and the saved team stay); invisibility (true: WA's Invisibility for this worm alone, as its team's would give it: hidden and not followed where WA wouldn't show an invisible team, ghosted where it would; a weapon that ends Invisibility ends it; writes from simulation callbacks).",
      "units": "x, y px · vx, vy px/frame · gravity, wind factor (1 = normal) · fuel plain (0 = unlimited) · windup frames",
      "aliases": [
       "worm.x",
@@ -386,13 +395,14 @@
       "worm.windup",
       "worm.shots_fired",
       "worm.shots_to_fire",
-      "worm.name"
+      "worm.name",
+      "worm.invisibility"
      ]
     },
     {
      "key": "worm.readonly",
      "sig": "Worm fields (read only)",
-     "desc": "id, team, alliance, ammo_group, hp, kind, weapon (its id), turn, name, aim, aiming, drilling, state (standing, walking, ready, charging, prefiring, firing, fired, punching, drilling, teleporting, jetpacking, parachuting, sliding, roping, bungee, tumbling, frozen, kamikaze, jump_prepare, jumping, jump_falling, blasted, hit; nil for any other WA state), state_id, state_label, keys, taken.",
+     "desc": "id, team, alliance, ammo_group, hp, kind, weapon (its id), turn, name, aim, aiming, drilling, state (standing, walking, ready, charging, prefiring, firing, fired, punching, drilling, teleporting, jetpacking, parachuting, sliding, roping, bungee, tumbling, frozen, kamikaze, jump_prepare, jumping, jump_falling, blasted, hit, and WA's own death: dying, drowning, dead; nil for any other WA state), state_id, state_label, keys, taken.",
      "units": "aim 0 (down) to 1 (up)",
      "aliases": [
       "worm.aim",
@@ -474,14 +484,14 @@
     {
      "key": "worm:take",
      "sig": "worm:take{ hide, turn }",
-     "desc": "Hands the worm to the pack: it stays where the pack puts it.",
+     "desc": "Hands the worm to the pack: it stays where the pack puts it. Returns whether it did. Refused (false) for a worm in WA's death (dying, drowning, dead): WA keeps it still until it is gone.",
      "units": "",
      "aliases": []
     },
     {
      "key": "worm:release",
      "sig": "worm:release(vx, vy, { tumble })",
-     "desc": "Gives the worm back to WA, flying or tumbling.",
+     "desc": "Gives the worm back to WA, flying or tumbling; on a worm never taken, a launch. Returns whether it did. Refused (false) for a worm in WA's death (dying, drowning, dead): WA keeps it still until it is gone. A zero-HP worm WA hasn't started killing still launches.",
      "units": "px/frame",
      "aliases": []
     },
@@ -495,14 +505,14 @@
     {
      "key": "worm:carry",
      "sig": "worm:carry(x, y)",
-     "desc": "Moves a held worm.",
+     "desc": "Moves a held worm. Returns whether it did. Refused (false) for a worm in WA's death (dying, drowning, dead): WA keeps it still until it is gone.",
      "units": "px",
      "aliases": []
     },
     {
      "key": "worm:drop",
      "sig": "worm:drop()",
-     "desc": "Lets a carried worm fall.",
+     "desc": "Lets a carried worm fall. One that has started dying is only let go.",
      "units": "",
      "aliases": []
     },
