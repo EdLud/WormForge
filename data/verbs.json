@@ -1,7 +1,7 @@
 {
  "engine": "WormForge 0.9.1, 2026-10-17",
  "api_version": 4,
- "updated": "2026-10-24",
+ "updated": "2026-10-26",
  "units": "Lua speaks pixels: positions and sizes in pixels, speeds in pixels per frame, with fractions. The engine converts to WA's 16.16 once.",
  "sections": [
   {
@@ -80,6 +80,15 @@
      "aliases": []
     },
     {
+     "key": "wa.weapons.hold_sheet",
+     "sig": "wa.weapons.hold_sheet(weapon, n)",
+     "desc": "Draws held sheet n over the worm's aim pose: 0 the hold's sheet, 1 and on its hold.sheets (same frames and placement). Draw only, per weapon, so any callback may call it; as Project X swaps a WormSprite's sprite (the Gravity Gun's claws opening).",
+     "units": "",
+     "aliases": [
+      "hold.sheets"
+     ]
+    },
+    {
      "key": "wa.weapons.set_selectable",
      "sig": "wa.weapons.set_selectable{ weapon, team, selectable }",
      "desc": "Whether a team (1 to 6) may select a placed weapon, for now: one it may not is greyed on the panel, can't be picked and is skipped by the F-keys, as WA's delayed weapons are, until it may again. Every round starts with all selectable. Simulation callbacks only. Since 0.9.1.",
@@ -145,6 +154,15 @@
       "worm_sprites_team_tint",
       "gpu_worm_sprites",
       "mole_dig_rotation"
+     ]
+    },
+    {
+     "key": "missile.trail.sprite",
+     "sig": "missile = { trail = { sprite = \"sprites/my_trail.png\" } }",
+     "desc": "A weapon's own native trail image, loaded with the claim and scoped to that weapon; it does not replace the stock trail sprite for anything else. An installation declaration, not something wa.weapons.launch loads mid-match.",
+     "units": "",
+     "aliases": [
+      "trail.sprite"
      ]
     },
     {
@@ -351,7 +369,7 @@
     {
      "key": "worm.fields",
      "sig": "Worm fields (read and write)",
-     "desc": "x, y, vx, vy, facing, visible, body_visible, collision_mask, fuel, gravity, wind, windup, shots_fired, shots_to_fire.",
+     "desc": "x, y, vx, vy, facing, visible, body_visible, collision_mask, fuel, gravity, wind, windup, shots_fired, shots_to_fire, name (writes, from simulation callbacks, keep the first 16 printable ASCII bytes and change the native name and label; id and the saved team stay).",
      "units": "x, y px · vx, vy px/frame · gravity, wind factor (1 = normal) · fuel plain (0 = unlimited) · windup frames",
      "aliases": [
       "worm.x",
@@ -367,13 +385,14 @@
       "worm.wind",
       "worm.windup",
       "worm.shots_fired",
-      "worm.shots_to_fire"
+      "worm.shots_to_fire",
+      "worm.name"
      ]
     },
     {
      "key": "worm.readonly",
      "sig": "Worm fields (read only)",
-     "desc": "id, team, alliance, ammo_group, hp, kind, weapon (its id), turn, aim, aiming, drilling, state (standing, prefiring, firing, fired, punching, drilling, teleporting, jetpacking, parachuting, sliding, bungee, tumbling, frozen, kamikaze, jump_prepare, jumping, blasted, hit; nil for any other WA state), state_id, state_label, keys, taken.",
+     "desc": "id, team, alliance, ammo_group, hp, kind, weapon (its id), turn, name, aim, aiming, drilling, state (standing, walking, ready, charging, prefiring, firing, fired, punching, drilling, teleporting, jetpacking, parachuting, sliding, roping, bungee, tumbling, frozen, kamikaze, jump_prepare, jumping, jump_falling, blasted, hit; nil for any other WA state), state_id, state_label, keys, taken.",
      "units": "aim 0 (down) to 1 (up)",
      "aliases": [
       "worm.aim",
@@ -396,9 +415,32 @@
     },
     {
      "key": "worm:ammo",
-     "sig": "worm:ammo(weapon, n) / worm:ammo(weapon, { set = n })",
-     "desc": "Reads, adds or sets the team's ammo for a placed weapon, by its id.",
+     "sig": "worm:ammo(weapon, n) / worm:ammo(weapon, { set = n, keep_delay })",
+     "desc": "Reads, adds or sets the team's ammo for a placed weapon, by its id. keep_delay = true changes ammo without clearing the weapon's delay.",
      "units": "",
+     "aliases": [
+      "keep_delay"
+     ]
+    },
+    {
+     "key": "worm:delay",
+     "sig": "worm:delay(weapon) / worm:delay(weapon, turns)",
+     "desc": "Reads or writes the team's cooldown for a weapon, preserving ammo and selection: 0 usable, a positive count goes down with WA's team-turn upkeep, -1 blocked until cleared. Uses the worm's ammo row, shared inventories included. Writes from simulation callbacks.",
+     "units": "turns -1..127",
+     "aliases": []
+    },
+    {
+     "key": "worm:poison",
+     "sig": "worm:poison(amount)",
+     "desc": "A native gas exposure: WA checks immunity, adds the dose and takes its nonlethal health at turn boundaries. Returns whether the dose grew. Does not hurt the worm at once or change control. Simulation callbacks only.",
+     "units": "amount 1..1000",
+     "aliases": []
+    },
+    {
+     "key": "worm:reduce_health",
+     "sig": "worm:reduce_health(amount)",
+     "desc": "Lowers HP directly: no hit reaction, no control or movement change, no hurt callbacks. False, changing nothing, for a dead worm or a cost that would leave less than 1 HP. Pending damage stays queued. Simulation callbacks only.",
+     "units": "HP 0..10000",
      "aliases": []
     },
     {
@@ -635,6 +677,19 @@
      ]
     },
     {
+     "key": "on.hit",
+     "sig": "on = { hit = function(a, hit) end }",
+     "desc": "WA's blasts and hits on the actor go here instead of to its speed: hit.kind (\"blast\" or \"hit\"), hit.hit_kind, hit.x, hit.y, hit.vx, hit.vy (the push WA would give), hit.damage (after distance falloff), hit.team. Blasts also give hit.blast_damage, the damage before falloff.",
+     "units": "px, px/frame",
+     "aliases": [
+      "hit.kind",
+      "hit.hit_kind",
+      "hit.damage",
+      "hit.blast_damage",
+      "hit.team"
+     ]
+    },
+    {
      "key": "a:collision_ignore",
      "sig": "a:collision_ignore(worm, on)",
      "desc": "Lets one worm pass through the actor's body and mask, or not (simulation only). Returns whether it could be set.",
@@ -775,10 +830,14 @@
     },
     {
      "key": "wa.mines.spawn",
-     "sig": "wa.mines.spawn{ owner, x, y, vx, vy, fuse, arm, damage, radius, dud_proof }",
-     "desc": "Builds one of WA's mines, as Project X's new CMine: WA flies, arms, triggers and explodes it as its own. A worm owner's team lays it; an actor's mine is the map's.",
+     "sig": "wa.mines.spawn{ owner, x, y, vx, vy, fuse, arm, damage, radius, dud_proof, triggered, terrain_keep_speed_pct, on_bump }",
+     "desc": "Builds one of WA's mines, as Project X's new CMine: WA flies, arms, triggers and explodes it as its own. A worm owner's team lays it; an actor's mine is the map's. triggered = true starts it triggered (arming still runs first); terrain_keep_speed_pct (0..1000) is the speed it keeps along land until WA arms it. on_bump = function(mine, ev) hears what that mine's own movement ran into, as an actor's on.bump (Project X's CMine::Collide).",
      "units": "position px · speed px/frame · fuse, arm ms · radius px",
-     "aliases": []
+     "aliases": [
+      "on_bump",
+      "terrain_keep_speed_pct",
+      "triggered"
+     ]
     },
     {
      "key": "wa.arrows.spawn",
@@ -816,7 +875,7 @@
     {
      "key": "object.fields",
      "sig": "Object fields",
-     "desc": "x, y, vx, vy read and write; id, uid, kind, team, alliance read only; fuse on mines, worm_id on graves; damage and max_damage on oil drums, and visible (false: WA stops drawing that drum, so a pack can draw its own).",
+     "desc": "x, y, vx, vy read and write; id, uid, kind, team, alliance read only; fuse on mines; gravity on mines, crates, oil drums, missiles, arrows and graves (read and write from simulation callbacks: 1 WA's normal, 0 none, Project X's GravityFactor); worm_id on graves; damage and max_damage on oil drums, and visible on drums and mines (false: WA stops drawing it, a mine's countdown included, so a pack can draw its own or hide it; WA still moves and explodes it).",
      "units": "x, y px · vx, vy px/frame · fuse ms",
      "aliases": [
       "object.x",
@@ -832,7 +891,9 @@
       "grave.worm_id",
       "drum.damage",
       "drum.max_damage",
-      "drum.visible"
+      "drum.visible",
+      "object.gravity",
+      "mine.visible"
      ]
     },
     {
@@ -1201,7 +1262,7 @@
     {
      "key": "wa.msg",
      "sig": "wa.msg",
-     "desc": "Stock message names: START_TURN, FRAME_FINISH, FIRE_WEAPON, RELEASE_WEAPON, JUMP, JUMP_UP, HIT, EXPLOSION, IMPACT, NONLETHAL, POISON.",
+     "desc": "Stock message names: START_TURN (also when Tab picks another worm), TURN_STARTED (a real team-turn start, after the worm gains control), FRAME_FINISH, FIRE_WEAPON, RELEASE_WEAPON, WEAPON_RELEASED (WA's launch notification, before an ordinary shot's final fire; not an after-fire hook for every weapon), JUMP, JUMP_UP, HIT, EXPLOSION, IMPACT, NONLETHAL, POISON.",
      "units": "",
      "aliases": [
       "wa.msg.START_TURN",
@@ -1214,7 +1275,9 @@
       "wa.msg.EXPLOSION",
       "wa.msg.IMPACT",
       "wa.msg.NONLETHAL",
-      "wa.msg.POISON"
+      "wa.msg.POISON",
+      "wa.msg.TURN_STARTED",
+      "wa.msg.WEAPON_RELEASED"
      ]
     }
    ]
@@ -1227,7 +1290,7 @@
     {
      "key": "wa.draw.quad",
      "sig": "wa.draw.quad{ points, color or colors, sprite, frame, blend, depth }",
-     "desc": "Draws a textured quad; corners in the world.",
+     "desc": "Draws a textured quad; corners in the world. depth places it among the GPU sprites by wa.depth's three bands (behind terrain, on the ground, in front of WA's world).",
      "units": "px",
      "aliases": []
     },
@@ -1248,7 +1311,7 @@
     {
      "key": "wa.depth",
      "sig": "wa.depth.FRONT, EFFECTS, WORMS, OBJECTS, TERRAIN, BEHIND_TERRAIN",
-     "desc": "Named draw depths; lower is nearer. Plain numbers, so wa.depth.OBJECTS - 1 sits just in front.",
+     "desc": "Named draw depths; lower is nearer. Plain numbers, so wa.depth.OBJECTS - 1 sits just in front. Three bands: at or behind terrain (0x180000) terrain hides a GPU draw; from 0x100000 to wa.depth.TERRAIN - 1 it lies on the ground, in front of terrain but under whatever WA draws (worms, objects, effects, front water); nearer than 0x100000 only the HUD covers it.",
      "units": "",
      "aliases": []
     },
