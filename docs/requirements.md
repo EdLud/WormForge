@@ -12,9 +12,7 @@ What WormForge needs to run, and the WormKit modules known to clash with it.
   > Failed to load WormKit module wkLua.dll: LoadLibrary failed: Error
   > 0000007F
 
-  and WormForge writes no log, because none of its code ever runs. This
-  will not change: the language WormForge is written in (Rust) needs
-  Windows 10.
+  and WormForge writes no log, because none of its code ever runs.
 - **The Direct3D 9 (shader) renderer**, picked in WA's graphics options.
   WormForge draws its own sprites, animated GIFs, effects, tooltips and fog of
   war through it. With any other renderer the match still runs, but those
