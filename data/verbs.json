@@ -1,7 +1,7 @@
 {
- "engine": "WormForge 0.9.1, 2026-10-17",
+ "engine": "WormForge 0.9.52, 2026-10-27",
  "api_version": 4,
- "updated": "2026-10-26",
+ "updated": "2026-10-27",
  "units": "Lua speaks pixels: positions and sizes in pixels, speeds in pixels per frame, with fractions. The engine converts to WA's 16.16 once.",
  "sections": [
   {
@@ -462,8 +462,8 @@
     },
     {
      "key": "worm:hurt",
-     "sig": "worm:hurt(n) / worm:hurt{ amount, vx, vy }",
-     "desc": "Damages the worm, optionally with knockback.",
+     "sig": "worm:hurt(n) / worm:hurt{ amount, vx, vy, react }",
+     "desc": "Damages the worm, optionally with knockback. react = false: the damage alone, without WA's hit (no flinch, push or landing damage).",
      "units": "knock px/frame",
      "aliases": []
     },
@@ -471,6 +471,20 @@
      "key": "worm:heal",
      "sig": "worm:heal(n)",
      "desc": "Adds health.",
+     "units": "",
+     "aliases": []
+    },
+    {
+     "key": "worm:show_health",
+     "sig": "worm:show_health()",
+     "desc": "Moves the health label to the worm's health now, keeping the damage WA still owes it.",
+     "units": "",
+     "aliases": []
+    },
+    {
+     "key": "worm:die",
+     "sig": "worm:die()",
+     "desc": "Starts a zero-HP worm's death now, wherever it is; it flies on while it dies.",
      "units": "",
      "aliases": []
     },
