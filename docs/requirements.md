@@ -10,41 +10,22 @@
   > Failed to load WormKit module wkLua.dll: LoadLibrary failed: Error
   > 0000007F
 
-  and WormForge writes no log, because none of its code ever runs.
+  and WormForge writes no log.
 - **The Direct3D 9 (shader) renderer**, picked in WA's graphics options.
   WormForge draws its own sprites, animated GIFs, effects, tooltips and fog of
   war through it. With any other renderer the match still runs, but those
   are not drawn.
-- **The same WormForge version for every player** in an online match. Use
-  the mod loader's **Check online → Update all** after updating `wkLua.dll`,
-  so everyone also has the same mods.
-
+- **The same WormForge version for every player** in an online match.
+  
 ## WormKit modules
 
-Most WormKit modules work alongside WormForge. These don't:
+These WormKit modules don't work:
 
 ### wkFKeyRearrange: causes desyncs in online matches
 
-wkFKeyRearrange lets you choose which weapons each F-key cycles through,
-from `wkFKeyRearrange.ini`. **Remove `wkFKeyRearrange.dll` from your WA
+ **Remove `wkFKeyRearrange.dll` from your WA
 folder before playing online with WormForge.**
 
-Why: when a player presses an F-key, WA sends the key itself to every
-player, and each player's game then works out which weapon that key means,
-as part of the shared game simulation. wkFKeyRearrange changes that step on
-your machine only, using your `.ini`. So when anyone presses an F-key, your
-game can hand their worm a different weapon than everyone else's game does,
-and the match falls out of sync: WA reports a desynchronisation and drops a
-player. It doesn't matter who presses the key, or whose turn it is.
-
-This was confirmed on a real match (October 2026): replaying it with
-wkFKeyRearrange loaded reproduced the desync on the exact frame it happened;
-the same replay without it ran clean.
-
-The same applies without WormForge whenever the players' `.ini` files
-differ. WormForge also moves weapons between F-key rows (custom panel
-layouts, mod weapons on other slots), so with WormForge it happens far more
-often.
 
 ### wkFOW: use WormForge's own fog of war instead
 
