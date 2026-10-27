@@ -19,7 +19,7 @@ Replays and WormNET are supported out of the box. Start from the site, check fea
 
 INSTALL: Drop wkLua.dll next to WA.exe, Click "Check Online" and "Install". 
 
-REQUIRES: Wormkit, use Direct3D 9 (shader)
+REQUIRES: Windows 10 or later (or Wine/CrossOver), Wormkit, use Direct3D 9 (shader). Some WormKit modules clash with WormForge: <a href="docs/requirements.md">Requirements and compatibility</a>
 
 STATUS: Stable but replay backwards compability is not yet guaranteed.
 
