@@ -1,7 +1,5 @@
 # Requirements and compatibility
 
-What WormForge needs to run, and the WormKit modules known to clash with it.
-
 ## What you need
 
 - **Worms Armageddon 3.8.1** with WormKit modules enabled: `wkLua.dll` sits
