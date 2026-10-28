@@ -323,12 +323,10 @@ the same file works wherever a player puts it, next to any other mod's
 weapons. Wherever Lua names a weapon, it uses the id: `copy_from`, a
 profile's `[weapons]`, the `weapon` of an event such as `on_explode`'s `ev`.
 
-### 2. Lua speaks pixels
+### 2. Pixel Units
 
-Positions and sizes are in pixels, speeds in pixels per frame (WA runs 50
-frames a second), and fractions are fine: `ev.x` may be `812.5`, which is
-why the Moon Grenade rounds it down to print it. WormForge converts to and
-from WA's own units; you never multiply by 65536.
+Positions and sizes are always in pixels, speeds in pixels per frame (WA runs 50
+frames a second), and fractions are fine: `ev.x` may be `812.5`.
 
 ### 3. The simulation changes the game; drawing only looks
 
