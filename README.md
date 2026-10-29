@@ -4,7 +4,7 @@
 
 <a href="https://edlud.github.io/WormForge">Web Weapon Editor</a>
 
-<a href="https://edlud.github.io/WormForge/capabilities.html">Features</a>
+<a href="docs/verbs.md">Lua verbs</a>
 
 <a href="https://github.com/EdLud/WormForge/releases">Download</a>
 
