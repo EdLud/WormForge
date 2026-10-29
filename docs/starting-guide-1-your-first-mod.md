@@ -393,5 +393,5 @@ See also:
 - [Weapon records](weapon-records.md): everything a weapon's record holds.
 - [Moving actors](actor-movement.md): things your Lua spawns, and how they
   move.
-- The [verb list](https://ropahektic.github.io/WormForge/capabilities.html#verb=wa.weapons.replace)
+- The [verb list](https://edlud.github.io/WormForge/capabilities.html#verb=wa.weapons.replace)
   on the capabilities page: every `wa` function.

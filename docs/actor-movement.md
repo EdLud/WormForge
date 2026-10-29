@@ -168,6 +168,6 @@ the same on every machine:
 
 - `contributing-with-an-agent.md` in the engine repository: the full field
   lists for `wa.actors.spawn`, `body`, `on.bump` and `on.contact`.
-- The [verb list](https://ropahektic.github.io/WormForge/capabilities.html#verb=on.bump)
+- The [verb list](https://edlud.github.io/WormForge/capabilities.html#verb=on.bump)
   on the capabilities page.
 - [Weapon records](weapon-records.md): how a weapon's own projectiles behave.
