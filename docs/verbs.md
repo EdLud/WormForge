@@ -1167,6 +1167,12 @@ Units: px
 
 A random number for looks only, never for the simulation.
 
+### `wa.draw.fraction`
+
+`wa.draw.fraction()`
+
+How far this rendered frame is past the last simulation frame, 0 to 1: WA's own interpolation, the one worms and actors are drawn with. Draw a body you track yourself at `x + (x - previous_x) * wa.draw.fraction()` so it moves as smoothly as an actor. Inside `wa.on.draw` only; it differs on every machine, so never feed it to the simulation.
+
 ### `wa.depth`
 
 `wa.depth.FRONT, EFFECTS, WORMS, OBJECTS, TERRAIN, BEHIND_TERRAIN`
