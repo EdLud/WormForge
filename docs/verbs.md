@@ -2,7 +2,7 @@
 
 Every `wa` function, handle method, event and data field a pack can use, by area. It replaces the capabilities page.
 
-WormForge 0.9.53 · `api_version = 4` · updated 2026-10-29.
+WormForge 0.9.53 · `api_version = 4` · updated 2026-10-30.
 
 Lua speaks pixels: positions and sizes in pixels, speeds in pixels per frame, with fractions. The engine converts to WA's 16.16 once.
 
@@ -485,7 +485,7 @@ Bodies the pack controls: spawn them, move them, draw them.
 
 `wa.actors.spawn{ sprite, x, y, ... }`
 
-Creates a native WA actor. body = { shape, hits, `hit_by` } chooses its outline, outgoing movement and incoming attackers independently. A body uses the oil-drum layer (17). shape is worm (default), missile, sprite (registered sprite frame zero), or a pack-relative image path; a bare image uses no sprite slot and works with sprite=false. hits defaults to {}; `hit_by` defaults to `"all"`. Legacy collide, `collide_terrain`, `collide_worms`, `as_object`, shape, solid and mask options are accepted only without body. Other keys: sprite, x, y, vx, vy, from, origin, owner, gravity, `damage_terrain`, `damage_worms`, drown, persist, visible, loop, [`on_explode`](#claim-fields), on = { frame, land, hit, contact, bump }.
+Creates a native WA actor. body = { shape, hits, `hit_by`, [`pushed_by`](#bodypushed_by) } chooses its outline, outgoing movement, incoming attackers and how hard what runs into it pushes it, independently. A body uses the oil-drum layer (17). shape is worm (default), missile, sprite (registered sprite frame zero), or a pack-relative image path; a bare image uses no sprite slot and works with sprite=false. hits defaults to {}; `hit_by` defaults to `"all"`. Legacy collide, `collide_terrain`, `collide_worms`, `as_object`, shape, solid and mask options are accepted only without body. Other keys: sprite, x, y, vx, vy, from, origin, owner, gravity, `damage_terrain`, `damage_worms`, drown, persist, visible, loop, [`on_explode`](#claim-fields), on = { frame, land, hit, contact, bump }.
 
 Units: position px
 
@@ -518,6 +518,14 @@ Also: `body.hits`
 Incoming categories: worms, missiles, arrows, mines, actors, bullets, melee, fire, `dragon_ball`, blasts. `"all"` allows every category; {} excludes them all. Read/write independently of hits; writes require simulation callbacks and leave the body active for its own physics. Filters narrow stock rules: Prod still cannot push objects and melee tests the target position. Bodies do not catch ninja ropes. Unknown keys are refused.
 
 Also: `body.hit_by`, `body.shape`
+
+### `body.pushed_by`
+
+`body = { pushed_by = { mines = 0.2 } }`
+
+How hard what runs into the actor pushes it. When a body WA moves runs into the actor, WA trades their speeds; the actor keeps this share (0 to 1) of the speed it was given, and the mover keeps the speed WA left it, so it slows against the actor instead of bouncing off. Keys: worms, missiles, arrows, mines (every WA mine, the level's as much as a laid one), actors; one left out keeps WA's whole push. Blasts, guns and other hits are not affected: they still reach the actor through `on.hit`. Set at spawn. A sprite-shaped actor with on.contact gets no push from WA to scale. The Electromagnet's "Mines push the magnet" option uses it.
+
+Units: share 0..1
 
 ### `a.light`
 

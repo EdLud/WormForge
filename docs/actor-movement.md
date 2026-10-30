@@ -146,6 +146,12 @@ hit), friction, and settling, where WA stops moving a body that has come to
 rest. That is right for something thrown that should land and lie still,
 like a turret.
 
+What runs into a mine-physics actor pushes it, as mines push each other: WA
+trades their speeds. `body.pushed_by = { mines = 0.2 }` keeps only that share
+of the push, here a fifth of what a mine gives it (keys `worms`, `missiles`,
+`arrows`, `mines`, `actors`; 0 none, 1 WA's whole push). The Electromagnet
+uses it so the mines it pulls in can't knock it away.
+
 It is wrong for anything that drives itself: friction and settling eat the
 small speed a steering brain adds each frame, and the actor crawls whatever
 speed you ask for. A flier or walker wants a plain `body` (first row of the
