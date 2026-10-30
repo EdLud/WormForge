@@ -851,7 +851,7 @@ Units: px
 
 `wa.world.view()`
 
-{ cx, cy, w, h }: the camera's centre in the world and the screen's size.
+{ cx, cy, w, h, zoom }: the camera's centre in the world, the screen's size, and this machine's zoom (1 = none; the screen then shows w / zoom by h / zoom of the world, about the centre). The zoom is the player's own (mouse wheel) and differs between peers: use it for drawing, never for anything the simulation reads.
 
 Units: px
 
