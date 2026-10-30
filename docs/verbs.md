@@ -1039,7 +1039,7 @@ Hooks a pack registers with `wa.on`, and the stock message names.
 
 `wa.on.turn_start(fn)`
 
-When a turn starts.
+When a turn starts, and again with the new worm at a worm switch within it (Tab, Select Worm).
 
 ### `wa.on.turn_retreat`
 
@@ -1051,7 +1051,7 @@ When weapon use ends and retreat starts.
 
 `wa.on.turn_end(fn)`
 
-When retreat ends and movement stops.
+When the turn ends (after the retreat), on the frame WA ends it, before WA waits for everything to settle. A turn whose worm is gone (a Kamikaze off the map) gets it then too, with no worm. A worm switch within the turn (Tab, Select Worm) doesn't end it.
 
 ### `wa.on.turn_cleanup`
 
