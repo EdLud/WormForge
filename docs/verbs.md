@@ -1247,6 +1247,32 @@ Loads a component's own sprites and sounds on no weapon, from its install: how a
 
 Plays a sound at a worm, actor or object.
 
+### `wa.camera.follow`
+
+`wa.camera.follow("all" | "owned" [, { public = false }])`, `wa.camera.follow()`
+
+What WA's automatic camera may follow on each machine. `"owned"`: the other side's worms, team cursor, shots and Lua actors never move this player's camera, so it gives none of them away (Project X's fog rule). Crates, drums, fire and explosions still move it; `public = false` drops those too. Online a player's side is the teams their machine plays; offline and in replays it is the side whose turn it is; with fog on, what the fog shows them. `"all"` is WA's own, and every match starts with it. Returns the rule now in force and whether objects of no side still move the camera. Presentation only, from any callback. The fog add-on's `camera_follow` option sets it.
+
+Also: `camera.follow`
+
+### `wa.camera.look`
+
+`wa.camera.look(x, y, { priority = 5, fixed = false, owner })`
+
+Asks for the camera this frame, as a WA object does. WA forgets every request each frame, so call it every frame it should hold the camera, from a simulation callback. priority 0..13, lower is stronger (WA asks at 0 for the team's land cursor, 1..13 for worms and objects); `fixed = true` takes WA's fixed point, before any priority. With owner (a worm, actor or object) `wa.camera.follow` drops it as it would that owner's own requests; without, it counts as an object of no side.
+
+Units: px
+
+Also: `camera.look`
+
+### `object.camera`
+
+`worm.camera = nil | false | priority`, `object.camera = ...`
+
+One worm's or stock object's own camera requests: nil is WA's, false never moves the camera, a priority 0..13 asks at that priority instead. `wa.camera.follow` still applies. Any callback; it goes with the object. Not on the `wa.on.missile_frame` table: take the missile from `wa.world`'s lists.
+
+Also: `worm.camera`
+
 ## Fog of war
 
 Configure the fog of war and place lights, darkness and shadows. The fog is presentation only: it never reaches the simulation, so these may be called from any callback, and each machine may see differently.
