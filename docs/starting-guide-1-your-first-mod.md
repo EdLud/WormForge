@@ -5,7 +5,7 @@ WormForge. Part 1 builds one small weapon from an empty folder, plays it, and
 sets out the few rules every mod follows. The later parts go deeper, one
 subject each.
 
-The weapon is the **Moon Grenade**: WA's Grenade with about a third of the
+The weapon is the **Moon Grenade**: A copy of WA's Grenade with about a third of the
 gravity and a small burst, which digs three craters in the ground below it.
 The finished mod is [examples/starting_guide](https://github.com/EdLud/WormForge-mods/tree/main/examples/starting_guide)
 in the mods repository.
@@ -219,11 +219,8 @@ return {
 - `wa.weapons.replace{ ... }` makes the weapon. `copy_from = "stock.grenade"`
   starts from WA's Grenade, and `missile` changes two of its settings: 35% of
   WA's gravity, and an explosion of power 20 where WA's Grenade has 50. Power
-  is both the damage and the size of the blast, so the burst is small and
-  leaves the land around it for the craters. Everything not named stays the
-  Grenade's. [Weapon records](weapon-records.md) lists what can be changed.
-  It names no slot and no name: it makes the weapon the profile placed, and
-  the name is the one in `mod.toml`.
+  is both the damage and the size of the blast. Everything not named stays as the
+  Grenade's Weapon Record sets it. [Weapon records](weapon-records.md) lists what can be changed.
 - `on_explode` runs where the grenade bursts, with its position in `ev.x`,
   `ev.y`. It cuts three circles out of the land below the burst, 60 to 85
   pixels away, clear of the blast and of each other. `wa.random(a, b)` rolls
