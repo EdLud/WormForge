@@ -6,8 +6,8 @@ sets out the few rules every mod follows. The later parts go deeper, one
 subject each.
 
 The weapon is the **Moon Grenade**: WA's Grenade with about a third of the
-gravity, where one burst in four also digs a crater. The finished mod is
-[examples/starting_guide](https://github.com/EdLud/WormForge-mods/tree/main/examples/starting_guide)
+gravity and a small burst, which digs three craters in the ground below it.
+The finished mod is [examples/starting_guide](https://github.com/EdLud/WormForge-mods/tree/main/examples/starting_guide)
 in the mods repository.
 
 The short version:
@@ -128,7 +128,7 @@ format_version = 2
 id = "guide.moon_grenade"
 type = "weapon"
 name = "Moon Grenade"
-description = "WA's Grenade with about a third of the gravity. One burst in four also digs a crater."
+description = "WA's Grenade with about a third of the gravity and a small burst, which digs three craters in the ground below it."
 entry = "weapons/moon_grenade.lua"
 icon = "grenade"
 default_position = { row = "F2", column = 6 }
@@ -157,8 +157,8 @@ A component's file runs when a match loads, and returns what the component
 is. For a weapon, that is a table with two keys:
 
 ```lua
--- Moon Grenade: WA's Grenade with about a third of the gravity.
--- One burst in four also digs a crater.
+-- Moon Grenade: WA's Grenade with about a third of the gravity and a small
+-- burst, which digs three craters in the ground below it.
 
 return {
   -- The weapon's data. The profile's settings for it (the loader's
@@ -168,27 +168,40 @@ return {
   },
 
   install = function()
-    local last_crater -- set by the simulation, shown by the HUD
+    local last_burst -- set by the simulation, shown by the HUD
 
     wa.weapons.replace{
       copy_from = "stock.grenade",
-      missile = { gravity_pct = 35 },
+      missile = {
+        gravity_pct = 35,
+        explosion = { power = 20 },
+      },
 
       -- Simulation: runs on every player's machine at the same moment,
       -- so it may change the game and roll WA's dice.
       on_explode = function(ev)
-        if wa.random(4) == 1 then
-          wa.land.cut{ x = ev.x, y = ev.y, shape = "circle", radius = 40 }
-          last_crater = ("%d, %d"):format(math.floor(ev.x), math.floor(ev.y))
-          wa.log("crater at " .. last_crater)
+        -- One crater down-right, one straight down, one down-left. The dice
+        -- pick each one's angle within its part (0 degrees is right, 90 is
+        -- straight down), its distance and its size.
+        for i = 0, 2 do
+          local angle = math.rad(20 + 60 * i + wa.random(0, 20))
+          local distance = wa.random(60, 85)
+          wa.land.cut{
+            x = ev.x + distance * wa.math.cos(angle),
+            y = ev.y + distance * wa.math.sin(angle),
+            shape = "circle",
+            radius = wa.random(12, 18),
+          }
         end
+        last_burst = ("%d, %d"):format(math.floor(ev.x), math.floor(ev.y))
+        wa.log("craters below " .. last_burst)
       end,
     }
 
     -- Drawing: runs on each machine when it draws a frame, so it only reads.
     wa.on.hud(function()
-      if last_crater then
-        wa.hud.line("Moon Grenade: last crater at " .. last_crater)
+      if last_burst then
+        wa.hud.line("Moon Grenade: craters below " .. last_burst)
       end
     end)
   end,
@@ -204,15 +217,21 @@ return {
   refused. `install` also receives a `ctx` table, with where the weapon was
   placed and its data; part 2 covers it.
 - `wa.weapons.replace{ ... }` makes the weapon. `copy_from = "stock.grenade"`
-  starts from WA's Grenade, `missile = { gravity_pct = 35 }` changes one of
-  its settings (35% of WA's gravity), and everything not named stays the
+  starts from WA's Grenade, and `missile` changes two of its settings: 35% of
+  WA's gravity, and an explosion of power 20 where WA's Grenade has 50. Power
+  is both the damage and the size of the blast, so the burst is small and
+  leaves the land around it for the craters. Everything not named stays the
   Grenade's. [Weapon records](weapon-records.md) lists what can be changed.
   It names no slot and no name: it makes the weapon the profile placed, and
   the name is the one in `mod.toml`.
 - `on_explode` runs where the grenade bursts, with its position in `ev.x`,
-  `ev.y`. One time in four, it cuts a 40-pixel circle out of the land there.
-- `wa.on.hud` adds a line to the screen once there is a crater to report.
-  Every match runs the file afresh, so `last_crater` starts empty each match.
+  `ev.y`. It cuts three circles out of the land below the burst, 60 to 85
+  pixels away, clear of the blast and of each other. `wa.random(a, b)` rolls
+  a whole number from `a` to `b` for each one's angle, distance and radius,
+  so no two throws dig quite alike. `wa.math.cos` and `wa.math.sin` turn the
+  angle into a position (rule 3 below says why not `math.cos`).
+- `wa.on.hud` adds a line to the screen once a grenade has burst. Every
+  match runs the file afresh, so `last_burst` starts empty each match.
 
 In the game's weapon panel, the Moon Grenade shows the Grenade's icon, the
 weapon it copies. Part 2 gives it one of its own.
@@ -258,9 +277,10 @@ ammo = -1
 4. Start an offline game: a hotseat match with two teams is quickest. As it
    loads, the game says *Weapons come from the WormForge profile, not the
    lobby's weapon settings*.
-5. Press F2 until the Moon Grenade is selected, and throw it. It floats.
-   Throw a few more: about one in four leaves a crater, and the screen shows
-   *Moon Grenade: last crater at ...*.
+5. Press F2 until the Moon Grenade is selected, and throw it at the ground.
+   It floats, bursts small, and three craters open in the land below it.
+   The screen shows *Moon Grenade: craters below ...*. Throw WA's Grenade
+   beside it to compare the blasts.
 
 To use the Moon Grenade in another profile, open the loader's **Manage
 Weapon Panel**, search for it and double-click it.
@@ -271,7 +291,7 @@ Two files next to `WA.exe` tell you what happened:
 
 - **`wkLua.log`**: everything WormForge logs, your own lines included.
   `wa.log("...")` writes one, tagged with your component's id:
-  `[guide.moon_grenade] crater at 812, 403`. Lua's `print` doesn't reach the
+  `[guide.moon_grenade] craters below 812, 403`. Lua's `print` doesn't reach the
   log; use `wa.log`.
 - **`wkluaerror.txt`**: the errors alone. It starts empty each time WA
   starts, so look here first.
@@ -343,8 +363,8 @@ out the same on every machine. WormForge splits your code in two:
   may read anything and change nothing: WormForge refuses a change to the
   game from them, with an error.
 
-The Moon Grenade does both: `on_explode` cuts the land and records
-`last_crater`; the HUD only reads it.
+The Moon Grenade does both: `on_explode` rolls the dice, cuts the land and
+records `last_burst`; the HUD only reads it.
 
 What goes with it:
 
