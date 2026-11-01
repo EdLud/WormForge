@@ -2,7 +2,7 @@
 
 Every `wa` function, handle method, event and data field a pack can use, by area. It replaces the capabilities page.
 
-WormForge 0.9.53 · `api_version = 4` · updated 2026-10-30.
+WormForge 0.9.53 · `api_version = 4` · updated 2026-11-01.
 
 Lua speaks pixels: positions and sizes in pixels, speeds in pixels per frame, with fractions. The engine converts to WA's 16.16 once.
 
@@ -289,9 +289,9 @@ Read and move worms, change their ammo, and hand them between WA and the pack.
 
 ### `wa.worms.all`
 
-`wa.worms.all()`
+`wa.worms.all()`, `wa.worms.all{ near = { x, y, r } }`
 
-Every worm in the match.
+Every worm in the match; with `near`, only those within `r` pixels of (x, y), in the same order. `near` comes after 0.9.61.
 
 ### `wa.worms.nearest`
 
@@ -493,9 +493,9 @@ Also: `as_object`
 
 ### `wa.actors.all`
 
-`wa.actors.all()`
+`wa.actors.all()`, `wa.actors.all{ near = { x, y, r } }`
 
-Every live actor.
+Every live actor; with `near`, only those within `r` pixels of (x, y), in the same order. `near` comes after 0.9.61.
 
 ### `wa.actors.kind`
 
@@ -709,9 +709,9 @@ WA's own missiles, mines, crates, oil drums, graves and arrows, and WA's fires.
 
 ### `wa.missiles.all`
 
-`wa.missiles.all(), wa.mines.all(), wa.crates.all(), wa.oil.all(), wa.graves.all(), wa.arrows.all()`
+`wa.missiles.all(), wa.mines.all(), wa.crates.all(), wa.oil.all(), wa.graves.all(), wa.arrows.all()`, each also `{ near = { x, y, r } }`
 
-WA's own objects of that kind.
+WA's own objects of that kind; with `near`, only those within `r` pixels of (x, y), in the same order. The distance is exact in WA's fixed point. `near` comes after 0.9.61.
 
 Also: `wa.mines.all`, `wa.crates.all`, `wa.oil.all`, `wa.graves.all`, `wa.arrows.all`
 
@@ -1169,6 +1169,14 @@ Draws a textured strip through points (beams, arcs).
 
 Units: px
 
+### `wa.draw.trail`
+
+`local t = wa.draw.trail{ sprite, width, glow, glow_width, color, max = 12, shed = 2, floor = 0.1, blend, depth }`, then `t:push(x, y)`, `t:finish()`, `t:remove()`, `t.points`
+
+A ribbon the engine keeps and draws every frame, fed a point at a time from any callback: a trail behind a round. Point i of n (oldest first) is drawn at f = max(i / (n + 1), floor) of its width, u and colour; `glow` draws it again, wider. Finished, it sheds its oldest point every `shed` game frames. Comes after 0.9.61.
+
+Units: px
+
 ### `wa.draw.random`
 
 `wa.draw.random(...)`
@@ -1399,9 +1407,9 @@ A table's keys in a fixed order, for deterministic loops.
 
 ### `wa.perf.enable`
 
-`wa.perf.enable{ counter, profile, packs, spikes }`
+`wa.perf.enable{ counter, profile, packs, spikes, natives }`
 
-FPS counter and profiler in wkLua.log.
+FPS counter and profiler in wkLua.log. Diagnostics builds only; `natives` comes after 0.9.61.
 
 ### `wa.log`
 
