@@ -112,5 +112,5 @@ wa.land.stamp{
   no spear. Before, he took no damage and the spear was stamped around him.
 - Both cases are logged in `wkLua.log` as `Javelin: ...` lines.
 
-Replays recorded with an older px.ports in which a Javelin stuck next to a
-worm no longer play back.
+Replays keep the pack code they were recorded with, so older replays,
+including ones where a Javelin held a worm, still play back as they happened.
