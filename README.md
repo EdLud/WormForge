@@ -36,10 +36,10 @@ The mod loader shows who made each weapon. If a name is missing or wrong, please
 
 **Code and ideas from other WormKit modules:**
 
-- [wkVista](https://github.com/ropahektic/wkVista) by [Ropa](https://github.com/ropahektic/) (MIT): zoom and full-colour maps
+- [wkVista](https://github.com/ropahektic/wkVista) by [Ropa](https://github.com/ropahektic/) (MIT): full-colour maps and zoom, rebuilt on WormForge's own renderer
 - [wkZoom](https://github.com/ConnerPetzold/wkZoom) by [Syc](https://github.com/ConnerPetzold/), used with permission: smooth zoom
 - [wkJellyWorm](https://github.com/rm-rf-worms/wkJellyWorm) by [nizikawa](https://github.com/rm-rf-worms), with [JSG](https://github.com/jsgnextortex/)'s improvements in [wkJollyWorm](https://github.com/jsgnextortex/wkJellyWorm/tree/Wkjollyworm): weapon-record research
-- [wkRGBA](https://github.com/rUNaW4y/wkRGBA) by [rUNaW4y](https://github.com/rUNaW4y): the idea behind full-colour maps
+- [wkRGBA](https://github.com/rUNaW4y/wkRGBA) by [rUNaW4y](https://github.com/rUNaW4y): the idea of giving WA a proxy map, so a full-colour map still plays and replays without the module
 
 **Core utilities:** Agility by Zed and 0rang3, ExTurnSide and Live HP by reddaz.
 
