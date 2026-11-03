@@ -30,7 +30,7 @@ Originally created by [ropahektic](https://github.com/ropahektic/), now maintain
 
 **Project X.** The Project X ports bring PX's weapons, rules and art to WormForge, from 0rang3's current PX build. Project X is by Entuser and many authors. Each port is credited to the authors its PX scripts name:
 
-0rang3 · Curtis · Danylo · DannyB · Entuser · [\_Kilburn](https://github.com/UnderscoreKilburn) · Pablo · PyroMan · rafa\`\`2 · raffie · ravander · reddaz · [\StepS](https://github.com/StepS-/) · Twicken · Zed
+0rang3 · Curtis · Danylo · DannyB · Entuser · [\_Kilburn](https://github.com/UnderscoreKilburn) · Pablo · PyroMan · rafa\`\`2 · raffie · ravander · reddaz · [StepS](https://github.com/StepS-/) · Twicken · Zed
 
 The mod loader shows who made each weapon. If a name is missing or wrong, please open an issue.
 
