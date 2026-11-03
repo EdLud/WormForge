@@ -21,13 +21,13 @@ Lua speaks pixels: positions and sizes in pixels, speeds in pixels per frame, wi
 
 ## Weapons
 
-Give a placed weapon its record, art and behaviour, read it back, or fire one from a script. A weapon is named by its id (px.javelin, or `stock.bazooka` for WA's own), never by a slot.
+Give a placed weapon its record, art and behaviour, read it back, or fire one from a script. A weapon is named by its id (px.javelin, or `stock.bazooka`).
 
 ### `wa.weapons.replace`
 
 `wa.weapons.replace{ copy_from, name, missile, ... }`
 
-In a weapon's install: gives the weapon the profile placed its record, art and behaviour (see [Claim fields](#claim-fields)). It names no slot; it claims the weapon's own.
+In a weapon's install: gives the weapon its record, art and behaviour (see [Claim fields](#claim-fields)).
 
 ### `wa.weapons.register`
 
@@ -39,7 +39,7 @@ The older form: claims a stock slot named by `based_on`. A bundle's weapon uses 
 
 `wa.weapons.launch{ weapon, owner, x, y, vx, vy, missile, clusters }`
 
-Fires a real WA missile: a placed weapon as itself, else `stock.<name>` as WA's own. missile = { ... } and clusters = { ... } change that shot's record fields (fuse, sprite, explosion.power, burst, ...).
+Fires a real WA missile: a placed custom weapon or `stock.<name>`. missile = { ... } and clusters = { ... } change that shot's record fields (fuse, sprite, explosion.power, burst, ...).
 
 Units: position px · speed px/frame · fuse, countdown ms
 
