@@ -39,7 +39,7 @@ The older form: claims a stock slot named by `based_on`. A bundle's weapon uses 
 
 `wa.weapons.launch{ weapon, owner, x, y, vx, vy, missile, clusters }`
 
-Fires a real WA missile: a placed custom weapon or `stock.<name>`. missile = { ... } and clusters = { ... } change that shot's record fields (fuse, sprite, explosion.power, burst, ...).
+Fires a real WA missile: a placed custom weapon or `stock.<name>`. missile = { ... } and clusters = { ... } change that shot's record fields (fuse, sprite, explosion.power, burst, ...). Since 0.9.8, also a weapon a component [`launches`](launches.md) that the profile doesn't place.
 
 Units: position px · speed px/frame · fuse, countdown ms
 
@@ -71,7 +71,7 @@ Units: position px
 
 `wa.weapons.data(weapon)`
 
-A weapon's record as the claim's named tables, with fires.as naming its family: a placed weapon's as this round has it, WA's untouched one for a `stock.<name>` not on the panel.
+A weapon's record as the claim's named tables, with fires.as naming its family: a placed weapon's as this round has it, WA's untouched one for a `stock.<name>` not on the panel. Since 0.9.8, also the record of a weapon only [launched](launches.md).
 
 ### `wa.weapons.retarget`
 
@@ -311,11 +311,11 @@ Units: position px
 
 `Worm fields (read and write)`
 
-x, y, vx, vy, facing, visible, `body_visible`, `collision_mask`, fuel, gravity, wind, windup, `shots_fired`, `shots_to_fire`, name (writes, from simulation callbacks, keep the first 16 printable ASCII bytes and change the native name and label; id and the saved team stay); invisibility (true: WA's Invisibility for this worm alone, as its team's would give it: hidden and not followed where WA wouldn't show an invisible team, ghosted where it would; a weapon that ends Invisibility ends it; writes from simulation callbacks).
+x, y, vx, vy, facing, visible, `body_visible`, `collision_mask`, fuel, gravity, wind, windup, `shots_fired`, `shots_to_fire`, name (writes, from simulation callbacks, keep the first 16 printable ASCII bytes and change the native name and label; id and the saved team stay); invisibility (true: WA's Invisibility for this worm alone, as its team's would give it: hidden and not followed where WA wouldn't show an invisible team, ghosted where it would; a weapon that ends Invisibility ends it; writes from simulation callbacks); selectable (false: WA's turn rotation and Tab pass over the worm, as Project X passes over its zombies; it keeps its health and place and still acts; if every living worm of its team is passed over, WA's pick stands; writes from simulation callbacks; every round starts selectable; since 0.9.8); tint (0xRRGGBB, { color, blend = "multiply" | "smooth_add", light = 0..1, glow = 0..1, `glow_color` } or nil: the body drawn with its colours multiplied by the colour, or Project X's smooth add of it, lit by it and glowing in it, as Project X's zombie; `glow_color` gives the glow a colour of its own, so a white color keeps WA's colours under a glow of any colour (Core utilities' Worm glow); drawing only, any callback; needs the shader renderer; since 0.9.8); `hide_hud` ({ labels, arrow, weapon, aim, from = "everyone" | "enemies" }, true or false: those parts of WA's HUD for the worm left undrawn, the body still drawn: its name, team, health and fuel labels; the arrow over it on its turn, the circling select arrows and the off-screen marker; the thought cloud while its player picks a weapon; its aim and crosshair; "enemies" hides them only from viewers who don't play its side; drawing only, any callback, may differ between machines; since 0.9.8).
 
 Units: x, y px · vx, vy px/frame · gravity, wind factor (1 = normal) · fuel plain (0 = unlimited) · windup frames
 
-Also: `worm.x`, `worm.y`, `worm.vx`, `worm.vy`, `worm.facing`, `worm.visible`, `worm.body_visible`, `worm.collision_mask`, `worm.fuel`, `worm.gravity`, `worm.wind`, `worm.windup`, `worm.shots_fired`, `worm.shots_to_fire`, `worm.name`, `worm.invisibility`
+Also: `worm.x`, `worm.y`, `worm.vx`, `worm.vy`, `worm.facing`, `worm.visible`, `worm.body_visible`, `worm.collision_mask`, `worm.fuel`, `worm.gravity`, `worm.wind`, `worm.windup`, `worm.shots_fired`, `worm.shots_to_fire`, `worm.name`, `worm.invisibility`, `worm.selectable`, `worm.tint`, `worm.body_scale`, `worm.hide_hud`
 
 ### `worm.readonly`
 
@@ -375,9 +375,9 @@ Units: knock px/frame
 
 ### `worm:heal`
 
-`worm:heal(n)`
+`worm:heal(n) / worm:heal(n, { from_zero })`
 
-Adds health.
+Adds health. A worm at 0 HP is refused, unless from_zero = true and WA hasn't started killing it (since 0.9.8): Project X's zombie, raised after a fall.
 
 ### `worm:show_health`
 
@@ -431,6 +431,12 @@ Units: px
 
 Lets a carried worm fall. One that has started dying is only let go.
 
+### `worm:use`
+
+`worm:use(weapon)`
+
+WA's own action of a weapon, performed by the worm now without firing it: no ammo or delay, nothing to its team or the turn. A placed weapon, else `stock.<name>`; its record this round decides. So far the Fire Punch family (an error for others). False for a dying worm, one already using one, or the worm whose turn it is. Simulation callbacks only. Since 0.9.8.
+
 ### `worm:warp`
 
 `worm:warp{ x, y, vx, vy, facing }`
@@ -475,7 +481,7 @@ Enters a WA state. Debugging only, opt-in per pack (`debug_worm_state`).
 
 `worm:input{ fire, aim, fuse, bounce, click, key }`
 
-Sends WA's own input messages for a worm: an offline diagnostic, opt-in per bundle (`debug_input`). Every call is logged; network rounds refuse it.
+Sends WA's own input messages for a worm, as its player's keys would: fire press or release, aim (degrees from level, -90 down to 90 up), fuse 1..5, bounce min or max, a click, or one key (left, right, up, down, face_left, face_right, jump, backflip, special, tab). Movement keys request one frame: send them each frame to hold. A worm without the turn walks too (Project X's zombies), and its keys never steer the team's released weapon. Simulation callbacks only. Up to 0.9.7 an offline diagnostic, opt-in per bundle (`debug_input`); since 0.9.8 any bundle, online too.
 
 ## Lua actors
 
@@ -529,9 +535,9 @@ Units: share 0..1
 
 ### `a.light`
 
-`a.light = "projectile" | false | { kind, mode, circle, cone = { length, width, toward }, shadow_cast, seen_by, discover, strength }`
+`a.light = "projectile" | false | { kind, mode, circle, cone = { length, width, toward }, shadow_cast, seen_by, discover, strength, owner_strength, reach, without_fog, into_terrain = { depth, falloff } }`
 
-The actor's fog-of-war light. A visible world actor has its profile's projectile light by default; invisible (sprite = false), cursor and screen-space actors have none until given one. A preset string (worm, animal, projectile, crate) uses that kind's profile settings; false removes the light; a table replaces the whole spec, and omitted geometry and `shadow_cast` come from its kind. mode is light (default), dark (shades what its cast sees) or shadow (shades what is hidden from it within reach); darkness wins over light. cone.toward is velocity (default), angle (the [`a:gfx`](#agfx) rotation), facing or degrees. `seen_by` is owner (default: the owning worm's side, per `view_ownership`; public without an owning worm) or everyone. discover = true requires `seen_by` = owner; dark and shadow never record terrain memory. strength (0..255) is for dark and shadow only. Presentation only: any callback may set it. Reading returns the spec table, or false.
+The actor's fog-of-war light. A visible world actor has its profile's projectile light by default; invisible (sprite = false), cursor and screen-space actors have none until given one. A preset string (worm, animal, projectile, crate) uses that kind's profile settings; false removes the light; a table replaces the whole spec, and omitted geometry and `shadow_cast` come from its kind. mode is light (default), dark (shades what its cast sees) or shadow (shades what is hidden from it within reach); darkness wins over light. cone.toward is velocity (default), angle (the [`a:gfx`](#agfx) rotation), facing or degrees. `seen_by` is owner (default: the owning worm's side, per `view_ownership`; public without an owning worm) or everyone. discover = true requires `seen_by` = owner; dark and shadow never record terrain memory. strength (0..255) is for dark and shadow only. Dark and shadow also take (since 0.9.8): without_fog = true, drawn in a match without fog too, as the fog draws darkness with a fully lit floor, covering the names of worms under it; reach (0..700), how far the cast reaches, with circle (no more than reach) how far the darkness spreads inside it; and owner_strength (0..255), what the owner's side sees instead of strength. Dark only: into_terrain = { depth, falloff } (0..32 px each), the darkness going on into the terrain its cast reaches, depth pixels at full, then fading over falloff more, solid pixels only. Changing circle inside reach, strength or owner_strength never casts again, so a darkness may spread or fade every frame. Presentation only: any callback may set it. Reading returns the spec table, or false.
 
 Units: px; degrees
 
@@ -1201,6 +1207,12 @@ Named draw depths; lower is nearer. Plain numbers, so `wa.depth.OBJECTS` - 1 sit
 
 Adds a line to the HUD.
 
+### `wa.hud.fps_counter`
+
+`wa.hud.fps_counter()`
+
+Turns on the FPS counter for the match: this machine's frame rate over the last second, at the top right. Every build; Lua cannot read the rate back. Since 0.9.8.
+
 ### `wa.hud.message_top`
 
 `wa.hud.message_top(text, { to, alliance })`
@@ -1245,9 +1257,9 @@ Resolves a pack sprite name once, for reuse in draw calls.
 
 ### `wa.assets.load`
 
-`wa.assets.load{ sprites, sounds, gpu_prefix }`
+`wa.assets.load{ sprites, sounds, gpu_prefix, wa_sprites, worm_glow }`
 
-Loads a component's own sprites and sounds on no weapon, from its install: how an add-on draws and plays its own art.
+Loads a component's own sprites and sounds on no weapon, from its install: how an add-on draws and plays its own art. wa_sprites (since 0.9.8) names WA's own sprites, by Gfx.dir name or the group "worm" (a worm's poses without a weapon), copied in full colour with the match, so what draws them in colour (`worm.tint`) has them from the start. `worm_glow` (since 0.9.8: true or { radius = 1..16, pad = 0..40, gain = 0.1..8 }) sets the shape of the match's worm glows (the silhouette blurred twice by radius, on cells pad larger each side, brightened by gain; left out: 3, twice the radius and one, 1.6) and makes glows with the match for the placed weapons' own worm poses, so a glowing worm aiming one keeps its glow.
 
 ### `wa.sound.play`
 
@@ -1325,11 +1337,19 @@ This machine's brightness at a point, 0..255, including the floor and shade. Dra
 
 Units: px
 
+### `wa.fog.shade`
+
+`wa.fog.shade(x, y)`
+
+This machine's darkness at a point, 0..255: the dark and shadow lights' shade, with fog or without (`without_fog`). Draw and HUD callbacks only. With `worm.hide_hud`, hide the HUD of worms in the dark. Since 0.9.8.
+
+Units: px
+
 ### `wa.fog.light`
 
-`wa.fog.light{ x, y, kind, mode, circle, cone = { length, width, toward }, shadow_cast, seen_by, owner, discover, strength, fade }`
+`wa.fog.light{ x, y, kind, mode, circle, cone = { length, width, toward }, shadow_cast, seen_by, owner, discover, strength, owner_strength, reach, without_fog, into_terrain, fade }`
 
-A light without an actor, returning a handle. Same keys as a.light, plus a place, an optional owner worm and fade (milliseconds: the circle closes like a blast's, then the light is removed). Seen by everyone unless owner is given. Its cone needs numeric toward degrees, since it has no heading. At most 64 free lights.
+A light without an actor, returning a handle. Same keys as a.light, plus a place, an optional owner worm and fade (milliseconds: the circle closes like a blast's, then the light is removed). Seen by everyone unless owner is given. Its cone needs numeric toward degrees, since it has no heading. With reach, fade closes the spread, not the cast. At most 64 free lights.
 
 Units: px; degrees; ms
 
@@ -1407,9 +1427,9 @@ A table's keys in a fixed order, for deterministic loops.
 
 ### `wa.perf.enable`
 
-`wa.perf.enable{ counter, profile, packs, spikes, natives }`
+`wa.perf.enable{ profile, packs, spikes, natives }`
 
-FPS counter and profiler in wkLua.log. Diagnostics builds only; `natives` comes after 0.9.61.
+Profiler in wkLua.log. Diagnostics builds only; `natives` comes after 0.9.61. Up to 0.9.7 it also took `counter`, the FPS counter, now `wa.hud.fps_counter`.
 
 ### `wa.log`
 
