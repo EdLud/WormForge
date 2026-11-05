@@ -363,7 +363,7 @@ Units: HP 0..10000
 
 `worm:equip(weapon)`
 
-Arms a placed weapon on the spot, by its id.
+Selects a placed weapon, by its id, as the player's own selection does: WA's fire key then fires it, under WA's rules. With no ammo the team gets one shot, taken back at the end of the turn if it wasn't fired. Returns the ammo held, or 0 when WA refuses the selection (in the middle of a use).
 
 ### `worm:hurt`
 
