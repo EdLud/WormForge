@@ -321,11 +321,11 @@ Also: `worm.x`, `worm.y`, `worm.vx`, `worm.vy`, `worm.facing`, `worm.visible`, `
 
 `Worm fields (read only)`
 
-id, team, alliance, `ammo_group`, hp, kind, weapon (its id), turn, name, aim, aiming, drilling, state (standing, walking, ready, charging, prefiring, firing, fired, punching, drilling, teleporting, jetpacking, parachuting, sliding, roping, bungee, tumbling, frozen, kamikaze, `jump_prepare`, jumping, `jump_falling`, blasted, hit, and WA's own death: dying, drowning, dead; `nil` for any other WA state), `state_id`, `state_label`, keys, taken.
+id, team, alliance, `ammo_group`, hp, kind, weapon (its id), turn, name, aim, `aim_target` (since 0.9.81: the aim the shot uses, which aim eases toward, in [`worm:input`](#worminput)'s degrees), aiming, drilling, state (standing, walking, ready, charging, prefiring, firing, fired, punching, drilling, teleporting, jetpacking, parachuting, sliding, roping, bungee, tumbling, frozen, kamikaze, `jump_prepare`, jumping, `jump_falling`, blasted, hit, and WA's own death: dying, drowning, dead; `nil` for any other WA state), `state_id`, `state_label`, keys, taken.
 
-Units: aim 0 (down) to 1 (up)
+Units: aim 0 (down) to 1 (up); `aim_target` degrees, -90 (down) to 90 (up), 0 level, relative to facing
 
-Also: `worm.aim`, `worm.aiming`, `worm.alliance`, `worm.ammo_group`, `worm.drilling`, `worm.hp`, `worm.id`, `worm.keys`, `worm.kind`, `worm.state`, `worm.state_id`, `worm.state_label`, `worm.taken`, `worm.team`, `worm.turn`, `worm.weapon`
+Also: `worm.aim`, `worm.aim_target`, `worm.aiming`, `worm.alliance`, `worm.ammo_group`, `worm.drilling`, `worm.hp`, `worm.id`, `worm.keys`, `worm.kind`, `worm.state`, `worm.state_id`, `worm.state_label`, `worm.taken`, `worm.team`, `worm.turn`, `worm.weapon`
 
 ### `worm:ammo`
 
@@ -601,11 +601,11 @@ Also: `bump`, `ev.surface_nx`, `ev.surface_ny`
 
 `on = { hit = function(a, hit) end }`
 
-WA's blasts and hits on the actor go here instead of to its speed: hit.kind (`"blast"` or `"hit"`), hit.`hit_kind`, hit.x, hit.y, hit.vx, hit.vy (the push WA would give), hit.damage (after distance falloff), hit.team. Blasts also give hit.`blast_damage`, the damage before falloff.
+WA's blasts and hits on the actor go here instead of to its speed: hit.kind (`"blast"` or `"hit"`), hit.`hit_kind`, hit.x, hit.y, hit.vx, hit.vy (the push WA would give), hit.damage (after distance falloff), hit.team. Blasts also give hit.`power` (older name hit.`blast_damage`), the damage before falloff.
 
 Units: px, px/frame
 
-Also: `hit.kind`, `hit.hit_kind`, `hit.damage`, `hit.blast_damage`, `hit.team`
+Also: `hit.kind`, `hit.hit_kind`, `hit.damage`, `hit.power`, `hit.blast_damage`, `hit.team`
 
 ### `a:collision_ignore`
 
@@ -1085,9 +1085,11 @@ Also: `event.victim`, `event.attacker`, `event.attacker_team`, `event.weapon`
 
 `wa.on.hurt(fn)`
 
-On every damage message. It can change the amount or eat the hit; hit.`source_weapon` is the id of an arrow's weapon.
+On every damage message that reaches the worm. It can change the amount or eat the hit; hit.`source_weapon` is the id of an arrow's weapon. Read hit.phase (`"pre"` before WA's handler, `"post"` after it, with hit.`lost`, the health it took). A blast comes only to the worms it reaches, with hit.`power` (the explosion's power, its amount), hit.damage (what the falloff gives this worm), hit.x, hit.y (the centre) and hit.vx, hit.vy (the push WA gives it). Changing a blast's amount changes its power for this worm alone; setting its damage in `pre` sets what this worm takes from it, the push left as WA's. hit.`expected` (blasts, hits and fire) is what WA will take off the worm's health, worked out before WA's handler by WA's own rules: 0 when the scheme's Phased Worms (Allied or Enemy) is at "worms, weapons and damage", the worm is frozen, dying or drowning, or, for a hit, was hit already this frame; half a blast plus 1 under water; Double Damage; no more than its health. It is for the message as WA sent it, and `lost` is what it took. Poison comes to every worm at each turn's end, amount 0 for a worm not poisoned.
 
-Also: `hit.source_weapon`
+Units: px, px/frame
+
+Also: `hit.source_weapon`, `hit.phase`, `hit.lost`, `hit.power`, `hit.damage`, `hit.expected`
 
 ### `wa.on.worm_message`
 
