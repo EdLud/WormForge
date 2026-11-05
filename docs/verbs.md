@@ -123,9 +123,9 @@ Units: position px
 
 ### Claim fields
 
-Fields read by replace. Record: `copy_from` (`stock.<name>`) or wep (a .wep file), and the record as named tables: fires, handling, missile, clusters, mine, gun, strike, `jet_pack`; raw = { `[offset]` = value } for a field without a name. Behaviour: `on_fire`, `on_click`, `on_select`, `on_explode`, `on_place`, `on_proximity`, `eat_fire`, `click_finish`, `fire_repeat`, `stock_fire_choice`, airborne, actor, `is_weapon`. Art and sound: name, `panel_icon`, `panel_icons`, icon, sprites, `sprite_overrides`, sounds, hold, `worm_sprites`, `worm_sprites_animate`, `worm_sprites_toggle`, `worm_sprites_team_tint`, `mole_dig_rotation`; params for drawing (`gpu_prefix`, layer, depth, truecolor, `gpu_worm_sprites`).
+Fields read by replace. Record: `copy_from` (`stock.<name>`) or wep (a .wep file), and the record as named tables: fires, handling, missile, clusters, mine, gun, strike, `jet_pack`; raw = { `[offset]` = value } for a field without a name. Behaviour: `on_fire`, `on_click`, `on_select`, `on_explode`, `on_place`, `on_proximity`, `eat_fire`, `click_finish`, `fire_repeat`, `stock_fire_choice`, airborne, actor, `is_weapon`. Art and sound: name, `panel_icon`, `panel_icons`, icon, sprites, `sprite_overrides`, sounds, hold, `worm_sprites`, `worm_sprites_animate`, `worm_sprites_toggle`, `worm_sprites_team_tint`, `mole_dig_rotation`; params for drawing (`gpu_prefix`, layer, depth, truecolor, `gpu_worm_sprites`, `worm_art`: the sheets of sprites a Lua actor draws in the worm's place, the worm in them, which glow with it, see [`a:gfx`](#agfx)).
 
-Also: `wep`, `copy_from`, `fires`, `handling`, `missile`, `clusters`, `mine`, `gun`, `strike`, `jet_pack`, `raw`, `params`, `on_fire`, `on_click`, `on_select`, `on_explode`, `on_place`, `on_proximity`, `eat_fire`, `click_finish`, `fire_repeat`, `stock_fire_choice`, `airborne`, `is_weapon`, `name`, `panel_icon`, `panel_icons`, `sprite_overrides`, `truecolor`, `sounds`, `hold`, `worm_sprites`, `worm_sprites_animate`, `worm_sprites_toggle`, `worm_sprites_team_tint`, `gpu_worm_sprites`, `mole_dig_rotation`
+Also: `wep`, `copy_from`, `fires`, `handling`, `missile`, `clusters`, `mine`, `gun`, `strike`, `jet_pack`, `raw`, `params`, `on_fire`, `on_click`, `on_select`, `on_explode`, `on_place`, `on_proximity`, `eat_fire`, `click_finish`, `fire_repeat`, `stock_fire_choice`, `airborne`, `is_weapon`, `name`, `panel_icon`, `panel_icons`, `sprite_overrides`, `truecolor`, `sounds`, `hold`, `worm_sprites`, `worm_sprites_animate`, `worm_sprites_toggle`, `worm_sprites_team_tint`, `gpu_worm_sprites`, `worm_art`, `mole_dig_rotation`
 
 ### `missile.trail.sprite`
 
@@ -677,9 +677,9 @@ Steps its sprite animation.
 
 ### `a:gfx`
 
-`a:gfx{ angle, scale, tint, depth }`
+`a:gfx{ angle, scale, tint, depth, glow_of }`
 
-Sets several drawing fields at once.
+Sets several drawing fields at once. glow_of = worm: the actor is drawn in that worm's place (a vehicle hiding its body), so it glows behind it as `worm.tint` makes the worm glow, in the tint's glow strength and colour; false ends it. It needs the glow the match made for the actor's sheet: list the sheet in the weapon's params.`worm_art`.
 
 ### `a:angle`
 
@@ -1259,7 +1259,7 @@ Resolves a pack sprite name once, for reuse in draw calls.
 
 `wa.assets.load{ sprites, sounds, gpu_prefix, wa_sprites, worm_glow }`
 
-Loads a component's own sprites and sounds on no weapon, from its install: how an add-on draws and plays its own art. wa_sprites (since 0.9.8) names WA's own sprites, by Gfx.dir name or the group "worm" (a worm's poses without a weapon), copied in full colour with the match, so what draws them in colour (`worm.tint`) has them from the start. `worm_glow` (since 0.9.8: true or { radius = 1..16, pad = 0..40, gain = 0.1..8 }) sets the shape of the match's worm glows (the silhouette blurred twice by radius, on cells pad larger each side, brightened by gain; left out: 3, twice the radius and one, 1.6) and makes glows with the match for the placed weapons' own worm poses, so a glowing worm aiming one keeps its glow.
+Loads a component's own sprites and sounds on no weapon, from its install: how an add-on draws and plays its own art. wa_sprites (since 0.9.8) names WA's own sprites, by Gfx.dir name or the group "worm" (a worm's poses without a weapon), copied in full colour with the match, so what draws them in colour (`worm.tint`) has them from the start. `worm_glow` (since 0.9.8: true or { radius = 1..16, pad = 0..40, gain = 0.1..8 }) sets the shape of the match's worm glows (the silhouette blurred twice by radius, on cells pad larger each side, brightened by gain; left out: 3, twice the radius and one, 1.6) and makes glows with the match for the placed weapons' own worm poses, so a glowing worm aiming one keeps its glow, and for the sheets the placed weapons draw in the worm's place (params.`worm_art`), for [`a:gfx`](#agfx)'s glow_of.
 
 ### `wa.sound.play`
 
