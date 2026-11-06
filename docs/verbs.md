@@ -219,9 +219,41 @@ Also: `airborne`
 
 `auto_use = true | false`
 
-A utility: switched on by itself at turn start, or on a pickup while it is off, one unit at a time, the rest banked; false keeps it to use by hand. `on_collect = "use" | "keep"` is the older spelling, still read; weapon data in `ctx.data` carries both, and `auto_use` wins where a declaration gives both.
+A utility: switched on by itself at turn start, or on a pickup while it is off, up to its `uses_per_turn`, the rest as its `extra_pickups` says; false keeps it to use by hand. `on_collect = "use" | "keep"` is the older spelling, still read; weapon data in `ctx.data` carries both, and `auto_use` wins where a declaration gives both.
 
 Also: `auto_use`, `on_collect`, `data.on_collect`
+
+### `data.uses_per_turn`
+
+`uses_per_turn = 1 | ... | 255 | "unlimited"`
+
+An instant utility that stacks: how many units one turn may use, by itself or by hand; a use past it is refused and the unit stays. WA's Double Time takes it as its stack limit. Declaring it makes the loader offer it (+N Seconds does). Since 0.9.82.
+
+Also: `uses_per_turn`
+
+### `data.extra_pickups`
+
+`extra_pickups = "keep" | "discard"`
+
+An instant utility with Auto-Use: what becomes of units past the turn's uses, banked for later turns or dropped. Units already held and infinite ammo are never dropped. WA's own four default to `discard`, as without Conserve Instant Utilities, which WormForge fixes. Since 0.9.82.
+
+Also: `extra_pickups`
+
+### `data.retreat_collect`
+
+`retreat_collect = "activate" | "keep" | "discard"`
+
+An instant utility with Auto-Use: a pickup during retreat is used at once, saved for the team's next turn, or dropped (`"nothing"` is the older name). A Lua utility handles it in its own `weapon_grant` callback, as +N Seconds does. Declaring it makes the loader treat the weapon as an instant utility and offer it with `extra_pickups`. WA's own four default to `activate`, as WA uses a pickup during the team's own retreat at once. Since 0.9.82.
+
+Also: `retreat_collect`
+
+### `data.placement_collect`
+
+`placement_collect = "activate" | "keep"`
+
+One of WA's four instant utilities with Auto-Use: a pickup during manual placement is used at once, through WA's own Expedite Instant Utilities step (a Crate Spy shows the crates to the worms still to be placed), or kept for the team's first turn. WA uses no instant utility before every worm is placed. Defaults to `keep`, as WA's Expedite off; a `.wsc` with Expedite on imports as `activate`. Since 0.9.82.
+
+Also: `placement_collect`
 
 ### `data.placement`
 
@@ -311,11 +343,11 @@ Units: position px
 
 `Worm fields (read and write)`
 
-x, y, vx, vy, facing, visible, `body_visible`, `collision_mask`, fuel, gravity, wind, windup, `shots_fired`, `shots_to_fire`, name (writes, from simulation callbacks, keep the first 16 printable ASCII bytes and change the native name and label; id and the saved team stay); invisibility (true: WA's Invisibility for this worm alone, as its team's would give it: hidden and not followed where WA wouldn't show an invisible team, ghosted where it would; a weapon that ends Invisibility ends it; writes from simulation callbacks); selectable (false: WA's turn rotation and Tab pass over the worm, as Project X passes over its zombies; it keeps its health and place and still acts; if every living worm of its team is passed over, WA's pick stands; writes from simulation callbacks; every round starts selectable; since 0.9.8); tint (0xRRGGBB, { color, blend = "multiply" | "smooth_add", light = 0..1, glow = 0..1, `glow_color` } or nil: the body drawn with its colours multiplied by the colour, or Project X's smooth add of it, lit by it and glowing in it, as Project X's zombie; `glow_color` gives the glow a colour of its own, so a white color keeps WA's colours under a glow of any colour (Core utilities' Worm glow); drawing only, any callback; needs the shader renderer; since 0.9.8); `hide_hud` ({ labels, arrow, weapon, aim, from = "everyone" | "enemies" }, true or false: those parts of WA's HUD for the worm left undrawn, the body still drawn: its name, team, health and fuel labels; the arrow over it on its turn, the circling select arrows and the off-screen marker; the thought cloud while its player picks a weapon; its aim and crosshair; "enemies" hides them only from viewers who don't play its side; drawing only, any callback, may differ between machines; since 0.9.8).
+x, y, vx, vy, facing, visible, `body_visible`, `collision_mask`, fuel, gravity, wind, windup, `shots_fired`, `shots_to_fire`, name (writes, from simulation callbacks, keep the first 16 printable ASCII bytes and change the native name and label; id and the saved team stay); invisibility (true: WA's Invisibility for this worm alone, as its team's would give it: hidden and not followed where WA wouldn't show an invisible team, ghosted where it would; a weapon that ends Invisibility ends it; writes from simulation callbacks); selectable (false: WA's turn rotation and Tab pass over the worm, as Project X passes over its zombies; it keeps its health and place and still acts; if every living worm of its team is passed over, WA's pick stands; writes from simulation callbacks; every round starts selectable; since 0.9.8); tint (0xRRGGBB, { color, blend = "multiply" | "smooth_add", light = 0..1, glow = 0..1, `glow_color` } or nil: the body drawn with its colours multiplied by the colour, or Project X's smooth add of it, lit by it and glowing in it, as Project X's zombie; `glow_color` gives the glow a colour of its own, so a white color keeps WA's colours under a glow of any colour (Core utilities' Worm glow); drawing only, any callback; needs the shader renderer; since 0.9.8); `hide_hud` ({ labels, arrow, weapon, aim, from = "everyone" | "enemies" }, true or false: those parts of WA's HUD for the worm left undrawn, the body still drawn: its name, team, health and fuel labels; the arrow over it on its turn, the circling select arrows and the off-screen marker; the thought cloud while its player picks a weapon; its aim and crosshair; "enemies" hides them only from viewers who don't play its side; drawing only, any callback, may differ between machines; since 0.9.8); `time_scale` (0..8: the worm lives that many of its own frames each world frame, WA's step of its body and its frame repeated, a fraction carried to the next, so 2.5 is two then three; 1 is the world's pace, 0 stops its time; drawn smoothly, a frame of its own at a time; with [`wa.world.set_speed`](#waworldspeed), a worm at full speed in a slowed world (Core utilities' Bullet Time); writes from simulation callbacks; since 0.9.82).
 
 Units: x, y px · vx, vy px/frame · gravity, wind factor (1 = normal) · fuel plain (0 = unlimited) · windup frames
 
-Also: `worm.x`, `worm.y`, `worm.vx`, `worm.vy`, `worm.facing`, `worm.visible`, `worm.body_visible`, `worm.collision_mask`, `worm.fuel`, `worm.gravity`, `worm.wind`, `worm.windup`, `worm.shots_fired`, `worm.shots_to_fire`, `worm.name`, `worm.invisibility`, `worm.selectable`, `worm.tint`, `worm.body_scale`, `worm.hide_hud`
+Also: `worm.x`, `worm.y`, `worm.vx`, `worm.vy`, `worm.facing`, `worm.visible`, `worm.body_visible`, `worm.collision_mask`, `worm.fuel`, `worm.gravity`, `worm.wind`, `worm.windup`, `worm.shots_fired`, `worm.shots_to_fire`, `worm.name`, `worm.invisibility`, `worm.selectable`, `worm.tint`, `worm.body_scale`, `worm.hide_hud`, `worm.time_scale`
 
 ### `worm.readonly`
 
@@ -363,7 +395,7 @@ Units: HP 0..10000
 
 `worm:equip(weapon)`
 
-Selects a placed weapon, by its id, as the player's own selection does: WA's fire key then fires it, under WA's rules. With no ammo the team gets one shot, taken back at the end of the turn if it wasn't fired. Returns the ammo held, or 0 when WA refuses the selection (in the middle of a use).
+Selects a placed weapon, by its id, as the player's own selection does: WA's fire key then fires it, under WA's rules. With no ammo the team gets one shot, taken back at the end of the turn if it wasn't fired. Returns the ammo held, or 0 when WA refuses the selection (in the middle of a use). Since 0.9.82; before, it armed the weapon outside WA's rules.
 
 ### `worm:hurt`
 
@@ -909,6 +941,14 @@ Units: px/frame²
 
 Also: `wa.world.set_wind`
 
+### `wa.world.speed`
+
+`wa.world.speed() / wa.world.set_speed(f)`
+
+The world's speed as a factor of the scheme's engine speed, 1/16..16 (0.5 is half speed), set as WA's replay viewer sets it: WA's sounds pitch with it, a pack's own WAVs don't. It changes how long a frame lasts in real time, never what happens in a frame, so it can't split an online match; WA's turn clock counts frames, so a slowed turn lasts longer. speed() is what the packs set (the replay viewer's speed keys change only the watching machine). set_speed from simulation callbacks only; each round starts at 1. Since 0.9.82.
+
+Also: `wa.world.set_speed`
+
 ### `wa.world.retreat`
 
 `wa.world.retreat() / wa.world.set_retreat(ms) / wa.world.turn_clock() / wa.world.set_turn_clock(ms)`
@@ -918,6 +958,14 @@ Retreat countdown and turn clock left; `set_retreat` changes a running retreat o
 Units: ms
 
 Also: `wa.world.turn_clock`, `wa.world.set_turn_clock`, `wa.world.set_retreat`
+
+### `wa.world.placing`
+
+`wa.world.placing()`
+
+True while worms are still being placed (manual placement). WA uses no instant utility until every worm is placed, so a utility of a pack's own can keep its pickups for the team's first turn, as +N Seconds does, the way WA's Double Time waits. Read-only. Since 0.9.82 (check `wa.world.placing` before calling it).
+
+Also: `placing`
 
 ### `wa.world.frame`
 
