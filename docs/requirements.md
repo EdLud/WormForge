@@ -4,8 +4,8 @@
 
 - **Worms Armageddon 3.8.1** with WormKit modules enabled: `wkLua.dll` sits
   next to `WA.exe`.
-- **Windows 10 or later recommended.** On macOS or Linux, Wine or CrossOver works.
-  May or may not work on Windows <10.
+- **Windows 7 or later**, Windows 10 or later recommended. On macOS or
+  Linux, Wine or CrossOver works. Windows Vista and XP are not supported.
 - **The Direct3D 9 (shader) renderer**, picked in WA's graphics options.
   WormForge draws its own sprites, animated GIFs, effects, tooltips and fog of
   war through it. With any other renderer the match still runs, but those
