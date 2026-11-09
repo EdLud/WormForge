@@ -335,7 +335,7 @@ The worm nearest a point or object.
 
 `wa.worms.spawn{ team, x, y, name, health }`
 
-Adds a worm to a team, in the place of a dead worm first, standing at once.
+Adds a worm to a team, in the place of a dead worm first, standing at once. A worm that died this turn keeps its place until WA has counted the turn's damage (since 0.9.83): a full team is refused until then.
 
 Units: position px
 
@@ -399,9 +399,9 @@ Selects a placed weapon, by its id, as the player's own selection does: WA's fir
 
 ### `worm:hurt`
 
-`worm:hurt(n) / worm:hurt{ amount, vx, vy, react }`
+`worm:hurt(n) / worm:hurt{ amount, vx, vy, react, kind }`
 
-Damages the worm, optionally with knockback. react = false: the damage alone, without WA's hit (no flinch, push or landing damage).
+Damages the worm, optionally with knockback. react = false: the damage alone, without WA's hit (no flinch, push or landing damage). `kind` is the hit's kind (see [Hit kinds](#hit-kinds)), the Prod's when left out. Since 0.9.83.
 
 Units: knock px/frame
 
@@ -431,9 +431,9 @@ Puts the worm in WA's frozen state.
 
 ### `worm:take`
 
-`worm:take{ hide, turn }`
+`worm:take{ hide, turn, fire, fire_as }`
 
-Hands the worm to the pack: it stays where the pack puts it. Returns whether it did. Refused (false) for a worm in WA's death (dying, drowning, dead): WA keeps it still until it is gone.
+Hands the worm to the pack: it stays where the pack puts it. Returns whether it did. Refused (false) for a worm in WA's death (dying, drowning, dead): WA keeps it still until it is gone. `fire` is what it may fire while held: nothing (the default), everything (`true`) or a list of weapon ids. `fire_as = "bungee"` has WA judge that fire as from its bungee, whatever state the worm is held in, so strikes, the Teleport and the Girder fire where a jump or fall refuses them. A held worm WA starts teleporting is let go, so the teleport ends where it was aimed.
 
 ### `worm:release`
 
@@ -467,7 +467,7 @@ Lets a carried worm fall. One that has started dying is only let go.
 
 `worm:use(weapon)`
 
-WA's own action of a weapon, performed by the worm now without firing it: no ammo or delay, nothing to its team or the turn. A placed weapon, else `stock.<name>`; its record this round decides. So far the Fire Punch family (an error for others). False for a dying worm, one already using one, or the worm whose turn it is. Simulation callbacks only. Since 0.9.8.
+WA's own action of a weapon, performed by the worm now without firing it: no ammo or delay, nothing to its team or the turn. A placed weapon, else `stock.<name>`; its record this round decides. So far the Fire Punch family and the Jet Pack family (an error for others). A jet pack puts the worm on WA's own jet pack with that record's fuel: unsteered it sinks slowly and lands unhurt, and stays on it until its fuel runs out, it is hit, or `worm:release` takes it off. False for a dying worm, one already using one or on a jet pack, or the worm whose turn it is. Simulation callbacks only. Since 0.9.8; the Jet Pack since 0.9.83.
 
 ### `worm:warp`
 
@@ -633,11 +633,11 @@ Also: `bump`, `ev.surface_nx`, `ev.surface_ny`
 
 `on = { hit = function(a, hit) end }`
 
-WA's blasts and hits on the actor go here instead of to its speed: hit.kind (`"blast"` or `"hit"`), hit.`hit_kind`, hit.x, hit.y, hit.vx, hit.vy (the push WA would give), hit.damage (after distance falloff), hit.team. Blasts also give hit.`power` (older name hit.`blast_damage`), the damage before falloff.
+WA's blasts and hits on the actor go here instead of to its speed: hit.kind (`"blast"`, or the hit's name: see [Hit kinds](#hit-kinds)), hit.x, hit.y, hit.vx, hit.vy (the push WA would give), hit.damage (after distance falloff), hit.team. Blasts, `wa.world.blast`'s among them, also give hit.`power` (older name hit.`blast_damage`), the damage before falloff. hit.`hit_kind` was removed in 0.9.83; reading it is an error.
 
 Units: px, px/frame
 
-Also: `hit.kind`, `hit.hit_kind`, `hit.damage`, `hit.power`, `hit.blast_damage`, `hit.team`
+Also: `hit.kind`, `hit.damage`, `hit.power`, `hit.blast_damage`, `hit.team`
 
 ### `a:collision_ignore`
 
@@ -664,6 +664,14 @@ Whether it stands on land.
 Cuts the terrain where it is: [`wa.land.cut`](#walandcut) at the actor.
 
 Units: px
+
+### `a:hit`
+
+`a:hit(damage, vx, vy, kind)`
+
+Sends the actor WA's hit through its own handler, as a gun or a flame reaches it: `body.hit_by` filters it, and `on.hit` (or, without one, WA's push) takes it. Use it to hit an actor another pack spawned. `damage` 0..10000; `kind` (see [Hit kinds](#hit-kinds)) the Prod's when left out. Returns false when the actor is gone or refuses it. Simulation callbacks only. Since 0.9.83.
+
+Units: push px/frame
 
 ### `a:explode`
 
@@ -709,9 +717,9 @@ Steps its sprite animation.
 
 ### `a:gfx`
 
-`a:gfx{ angle, scale, tint, depth, glow_of }`
+`a:gfx{ angle, scale, tint, depth, glow_of, follow }`
 
-Sets several drawing fields at once. glow_of = worm: the actor is drawn in that worm's place (a vehicle hiding its body), so it glows behind it as `worm.tint` makes the worm glow, in the tint's glow strength and colour; false ends it. It needs the glow the match made for the actor's sheet: list the sheet in the weapon's params.`worm_art`.
+Sets several drawing fields at once. glow_of = worm: the actor is drawn in that worm's place (a vehicle hiding its body), so it glows behind it as `worm.tint` makes the worm glow, in the tint's glow strength and colour; false ends it. It needs the glow the match made for the actor's sheet: list the sheet in the weapon's params.`worm_art`. follow = worm (since 0.9.83): art the pack puts at the worm every frame is drawn moved as the worm is drawn between frames, by WA's prediction or, for a worm on its own time (`worm.time_scale`), by its own frames, so a vehicle stays smooth under Bullet Time; false ends it. Drawing only.
 
 ### `a:angle`
 
@@ -823,9 +831,9 @@ Also: `object.x`, `object.y`, `object.vx`, `object.vy`, `object.id`, `object.uid
 
 ### `object:hit`
 
-`object:hit(damage, vx, vy)`
+`object:hit(damage, vx, vy, kind)`
 
-Hits a crate or oil drum.
+Sends WA's hit to a stock mine, crate or oil drum (anything else: false). `kind` (see [Hit kinds](#hit-kinds)), the Prod's when left out: a drum adds a `"fire"` hit's damage towards its limit and goes off at once at any other; a crate goes into its blast state whatever the damage; a mine takes the push. The old `"direct"` and `"projectile"` are errors since 0.9.83 (they sent `"prod"` and `"bullet"`).
 
 Units: px/frame
 
@@ -1003,9 +1011,9 @@ Units: px
 
 ### `wa.world.blast`
 
-`wa.world.blast{ x, y, owner, damage, radius, push_pct, terrain_radius }`
+`wa.world.blast{ x, y, owner, damage, radius, push_pct, terrain_radius, kind }`
 
-A radial blast with no sound or visuals: every body in `radius` takes `damage` falling off linearly from its centre (rounded down) and a push in step with the damage reaching it (`damage / 5` px/frame at 100%); `terrain_radius` cuts a hole of its own. `damage` 0..10000, `radius` above 0 and at most 8192, `push_pct` 0..1000 (default 100), `terrain_radius` 0..200 (default 0, no hole). `owner` (a worm) takes the credit; leave it out for a neutral blast. WA's objects take their usual hits, actors get `on.hit` with the damage already scaled, and `hit_by.blasts` immunity holds. Returns how many it hit. Simulation callbacks only.
+A radial blast with no sound or visuals: every body in `radius` takes `damage` falling off linearly from its centre (rounded down) and a push in step with the damage reaching it (`damage / 5` px/frame at 100%); `terrain_radius` cuts a hole of its own. `damage` 0..10000, `radius` above 0 and at most 8192, `push_pct` 0..1000 (default 100), `terrain_radius` 0..200 (default 0, no hole). `owner` (a worm) takes the credit; leave it out for a neutral blast. WA's objects take their usual hits; actors (since 0.9.83) and worms' `wa.on.hurt` get it as a blast, `kind = "blast"` (or `kind`'s name, see [Hit kinds](#hit-kinds)), `power` its damage, `damage` already scaled; `hit_by.blasts` decides for actors. To WA it is a hit: one per worm per frame. Returns how many it hit. Simulation callbacks only.
 
 Units: position, radius px · push\_pct %
 
@@ -1125,19 +1133,23 @@ After WA clears the turn.
 
 `wa.on.death(fn)`
 
-Once per worm death, with the attacker when known and the weapon's id.
+Once per worm death, with the attacker when known, the weapon's id and the last hit's kind.
 
-Also: `event.victim`, `event.attacker`, `event.attacker_team`, `event.weapon`
+Also: `event.victim`, `event.attacker`, `event.attacker_team`, `event.weapon`, `event.kind`
 
 ### `wa.on.hurt`
 
 `wa.on.hurt(fn)`
 
-On every damage message that reaches the worm. It can change the amount or eat the hit; hit.`source_weapon` is the id of an arrow's weapon. Read hit.phase (`"pre"` before WA's handler, `"post"` after it, with hit.`lost`, the health it took). A blast comes only to the worms it reaches, with hit.`power` (the explosion's power, its amount), hit.damage (what the falloff gives this worm), hit.x, hit.y (the centre) and hit.vx, hit.vy (the push WA gives it). Changing a blast's amount changes its power for this worm alone; setting its damage in `pre` sets what this worm takes from it, the push left as WA's. hit.`expected` (blasts, hits and fire) is what WA will take off the worm's health, worked out before WA's handler by WA's own rules: 0 when the scheme's Phased Worms (Allied or Enemy) is at "worms, weapons and damage", the worm is frozen, dying or drowning, or, for a hit, was hit already this frame; half a blast plus 1 under water; Double Damage; no more than its health. It is for the message as WA sent it, and `lost` is what it took. Poison comes to every worm at each turn's end, amount 0 for a worm not poisoned.
+On every damage message that reaches the worm. hit.kind is `"blast"`, the hit's name (see [Hit kinds](#hit-kinds); `"hit"` was split into them in 0.9.83), `"nonlethal"` or `"poison"`. It can change the amount or eat the hit; hit.`source_weapon` is the id of an arrow's weapon. Read hit.phase (`"pre"` before WA's handler, `"post"` after it, with hit.`lost`, the health it took). A blast comes only to the worms it reaches, with hit.`power` (the explosion's power, its amount), hit.damage (what the falloff gives this worm), hit.x, hit.y (the centre) and hit.vx, hit.vy (the push WA gives it). Changing a blast's amount changes its power for this worm alone; setting its damage in `pre` sets what this worm takes from it, the push left as WA's. hit.`expected` (blasts, hits and fire) is what WA will take off the worm's health, worked out before WA's handler by WA's own rules: 0 when the scheme's Phased Worms (Allied or Enemy) is at "worms, weapons and damage", the worm is frozen, dying or drowning, or, for a hit, was hit already this frame; half a blast plus 1 under water; Double Damage; no more than its health. It is for the message as WA sent it, and `lost` is what it took. Poison comes to every worm at each turn's end, amount 0 for a worm not poisoned.
 
 Units: px, px/frame
 
-Also: `hit.source_weapon`, `hit.phase`, `hit.lost`, `hit.power`, `hit.damage`, `hit.expected`
+Also: `hit.kind`, `hit.source_weapon`, `hit.phase`, `hit.lost`, `hit.power`, `hit.damage`, `hit.expected`
+
+### Hit kinds
+
+A hit says what hit, by name; WA 3.8.1 sends each from one weapon: `"prod"`, `"fire"`, `"drill"`, `"bullet"`, `"kamikaze"`, `"dragon_ball"`, `"baseball_bat"`, `"blow_torch"`, `"fire_punch"`, `"arrow"`, `"percent"` (Prod, flames, Pneumatic Drill, Handgun/Uzi/Shotgun/Minigun, Kamikaze, Dragon Ball, Baseball Bat, Blow Torch, Fire Punch, Longbow arrows, Battle Axe: `amount` a percentage of health). Only worms tell most apart: prod, kamikaze, dragon_ball, baseball_bat and fire_punch arm landing damage, fire tumbles the worm. Scripted kinds WA never sees (it gets the Prod's kind): the shared `"taze"`, and a bundle's own `"<bundle id>.<name>"` (lowercase letters, digits, `_`), which only that bundle may send. Senders: `worm:hurt`, `object:hit`, `a:hit`, `wa.world.blast`. Since 0.9.83.
 
 ### `wa.on.worm_message`
 
@@ -1217,6 +1229,14 @@ Draws a textured quad; corners in the world. depth places it among the GPU sprit
 
 Units: px
 
+### `wa.draw.quads`
+
+`wa.draw.quads{ quads, count, sprite, frame, blend, depth, visibility }`
+
+Draws many quads of one sprite in one call: nine numbers each in `quads`, `x1, y1, x2, y2, x3, y3, x4, y4, color`, the corners as [`wa.draw.quad`](#wadrawquad)'s points. `count` (at most 4096) defaults to `#quads // 9`, so one list can be refilled each frame. For particles; much cheaper than a `wa.draw.quad` a quad. Since 0.9.83.
+
+Units: px
+
 ### `wa.draw.ribbon`
 
 `wa.draw.ribbon{ points, width, ... }`
@@ -1229,7 +1249,7 @@ Units: px
 
 `local t = wa.draw.trail{ sprite, width, glow, glow_width, color, max = 12, shed = 2, floor = 0.1, blend, depth }`, then `t:push(x, y)`, `t:finish()`, `t:remove()`, `t.points`
 
-A ribbon the engine keeps and draws every frame, fed a point at a time from any callback: a trail behind a round. Point i of n (oldest first) is drawn at f = max(i / (n + 1), floor) of its width, u and colour; `glow` draws it again, wider. Finished, it sheds its oldest point every `shed` game frames. Comes after 0.9.61.
+A ribbon the engine keeps and draws every frame, fed a point at a time from any callback: a trail behind a round. Point i of n (oldest first) is drawn at f = max(i / (n + 1), floor) of its width, u and colour; `glow` draws it again, wider. Finished, it sheds its oldest point every `shed` game frames. Since 0.9.62.
 
 Units: px
 
@@ -1317,6 +1337,24 @@ Loads a component's own sprites and sounds on no weapon, from its install: how a
 
 Plays a sound at a worm, actor or object.
 
+A sound can be one line of one of WA's soundbanks, the same for every team whatever bank each picked: declare it in the component's `sounds` (or `wa.assets.load{ sounds }`) as `soundbank/<Bank>/<Line>`, then play it by that name.
+
+```lua
+sounds = { "soundbank/Kamikaze/Collect" },
+-- ...
+wa.sound.play(worm, "soundbank/Kamikaze/Collect")
+```
+
+The bank is a folder of `DATA\User\Speech` (WA's own banks, `Africaan` to `Wideboy`) or `User\Speech` (the player's own); the line is a file of it without `.wav` (`YesSir`, `Collect`, `Hmm`), case ignored. Only the lines a component declares are loaded. A bank a machine doesn't have (a custom bank, or one the digital releases leave out, such as `Jock`) is silent there and noted in `wkluaerror.txt`; the component still loads. Since 0.9.83 (an older DLL refuses the entry).
+
+### `wa.music.set_pitch`
+
+`wa.music.set_pitch(factor)`
+
+Plays WA's soundtrack at `factor` times its rate, 1/16..2: pitch and tempo together, as a tape slowed down or sped up (0.5 is an octave lower and half as fast). It holds until set again, across tracks; every match starts at 1. WA's sound effects follow [`wa.world.set_speed`](#waworldspeed) instead, and the music doesn't, so a pack slowing the world sets both (Core utilities' Bullet Time).
+
+Presentation only, from any callback: nothing about it can be read back, so a simulation callback may set it on every machine. Silent music, or none, leaves nothing to change. Since 0.9.83.
+
 ### `wa.camera.follow`
 
 `wa.camera.follow("all" | "owned" [, { public = false }])`, `wa.camera.follow()`
@@ -1342,6 +1380,18 @@ Also: `camera.look`
 One worm's or stock object's own camera requests: nil is WA's, false never moves the camera, a priority 0..13 asks at that priority instead. `wa.camera.follow` still applies. Any callback; it goes with the object. Not on the `wa.on.missile_frame` table: take the missile from `wa.world`'s lists.
 
 Also: `worm.camera`
+
+### `wa.view.ripple`
+
+`wa.view.ripple{ x, y, amplitude = 6, wavelength = 48, speed = 200, duration_ms = 600, falloff = wavelength }`
+
+Waves spreading from a world point through this machine's picture of the world: the land, water, worms, objects, actors, worm names and the crosshair ripple; the screen HUD (the timer, the wind bar, the weapon panel, chat, the Esc menu) does not. The leading wave travels `speed` pixels per second, the waves behind it halve every `falloff` pixels, and all of them fade out over `duration_ms`. `amplitude` is the largest push in pixels (0..64), `wavelength` the waves' length (8..4096). A falloff shorter than the wavelength leaves one ring, a shockwave; a longer one, a train of rings. Returns a handle: `r:stop()` ends it early. Up to 32 at once; another ends the oldest.
+
+Presentation only, from any callback: an explosion's `on_explode` may start one, and every machine draws its own. Nothing about a ripple can be read back. It moves the fog's darkness too, so one in the fog shows where it is. Needs WA's Direct3D 9 (shader) renderer, as all GPU drawing does; elsewhere it isn't drawn. Clicks and `wa.world.pointer()` ignore it. A frame with a ripple costs what a zoomed one does. Since 0.9.83.
+
+Units: px, px/s, ms
+
+Also: `view.ripple`
 
 ## Fog of war
 
