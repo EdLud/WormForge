@@ -2,8 +2,6 @@
 
 ![description](https://i.imgur.com/6Yfe1p6.png)
 
-<a href="https://edlud.github.io/WormForge">Web Weapon Editor</a>
-
 <a href="docs/verbs.md">Lua verbs</a>
 
 <a href="https://github.com/EdLud/WormForge/releases">Download</a>
