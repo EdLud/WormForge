@@ -15,7 +15,7 @@ Tutorial Overview:
 - A **mod** is a folder in `WormForge/Mods/` with a `mod.toml` and Lua files.
   It offers **components**: weapons, and features (anything that isn't a
   weapon).
-- Nothing in a mod runs by itself. A **profile** picks the weapons and
+- Nothing in a mod runs automatically. A **profile** picks the weapons and
   features a game uses, and where each weapon sits on the panel.
 - A weapon's file returns its data and an `install` function, which builds
   the weapon copying the behaviour of a WA weapon:
@@ -23,7 +23,7 @@ Tutorial Overview:
 - Put your mod beside `wf-lib`, never inside it.
 - Your files are read again at every match start: edit, save, start a new
   match.
-- Online, the host's profile and mods travel to every player. Replays carry
+- Online, the host's profile and mods are sent to every player in the Lobby. Replays carry
   them too.
 - Three rules: each weapon has an id which is a string; WormForge Lua works with Pixel Units;
   only the simulation changes the game.
@@ -34,14 +34,14 @@ A mod is what you install; a profile is what you play.
 
 - A **mod** is a folder: `mod.toml`, which names the mod and lists its
   components, plus their Lua files, sprites and sounds. A mod has no on/off
-  switch: every installed mod is there for every profile to use.
+  switch: every installed mod is can be used by a profile.
 - A **component** is one thing a mod offers. A **weapon** goes on the panel.
   A **feature** is anything else: a rule, an effect, a HUD. The loader calls
   features *add-ons*. Every component has an id, unique among all installed
   mods.
 - A **profile** is what a game runs: its weapons and where each sits on the
   panel, each weapon's settings (ammo, delay, crates, ...), the features and
-  their options, and WA's game scheme. Players make profiles in the loader
+  their options, and WSC settings. Players make profiles in the loader
   and save them in `WormForge/Profiles/`. A mod can ship its own, in its
   `profiles/` folder.
 
