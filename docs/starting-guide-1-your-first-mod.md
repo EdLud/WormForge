@@ -10,7 +10,7 @@ gravity and a small burst, which digs three craters in the ground below it.
 The finished mod is [examples/starting_guide](https://github.com/EdLud/WormForge-mods/tree/main/examples/starting_guide)
 in the mods repository.
 
-The short version:
+Tutorial Overview:
 
 - A **mod** is a folder in `WormForge/Mods/` with a `mod.toml` and Lua files.
   It offers **components**: weapons, and features (anything that isn't a
