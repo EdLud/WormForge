@@ -25,7 +25,7 @@ The short version:
   match.
 - Online, the host's profile and mods travel to every player. Replays carry
   them too.
-- Three rules: a weapon is an id, never a slot number; Lua speaks pixels;
+- Three rules: each weapon has an id; Lua speaks pixels;
   only the simulation changes the game.
 
 ## What a mod is
