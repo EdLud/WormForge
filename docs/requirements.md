@@ -28,7 +28,7 @@ wkFOW draws in the same places WormForge does, and WormForge then turns its
 drawing off (`wkLua.log` says "bytes differ"). WormForge has fog of war
 built in: select the **Fog of war** add-on in a profile.
 
-### wkZoom: not yet supported
+### wkZoom: not supported but WormForge has its own Zoom
 
 ### Seen working with WormForge
 
