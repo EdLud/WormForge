@@ -36,12 +36,24 @@ Modules players have used in WormForge matches without known problems:
 wkWormNAT2, wkTerrainSync, wkZRealTime, wkRemapKeys, wkSuperFrontend,
 wkKick38, wkMapGEN, wkTrackMeBetter381, wkPin and wkWormOrder.
 
-## Reporting a desync
+## Reporting a Bug
 
-If a match desyncs, send:
+3+ Types of bugs are possible, in order from highest to least likely: 
+ingame weirdness (why does the magnet behave weird), desyncs, crash to desktop
+
+### For ingame weirdness, send:
+- **your replay** and a time in that replay at which the weirdness happens + a description
+
+### If a match desyncs, send:
 
 - **every player's replay** of that match (`User/Games/*.WAgame` in each
   WA folder: each machine records its own, and comparing them shows where
   and how they split);
 - **the list of `wk*.dll` files** in each player's WA folder;
 - each player's `wkLua.log`, if they still have it.
+
+### For a crash, send:
+
+- **your replay**
+- **ERRORLOG.txt**
+- your `wkLua.log`
