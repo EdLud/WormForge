@@ -29,12 +29,6 @@ Give a placed weapon its record, art and behaviour, read it back, or fire one fr
 
 In a weapon's install: gives the weapon its record, art and behaviour (see [Claim fields](#claim-fields)).
 
-### `wa.weapons.register`
-
-`wa.weapons.register{ based_on, ... }`
-
-The older form: claims a stock slot named by `based_on`. A bundle's weapon uses replace.
-
 ### `wa.weapons.launch`
 
 `wa.weapons.launch{ weapon, owner, x, y, vx, vy, missile, clusters }`
@@ -123,9 +117,9 @@ Units: position px
 
 ### Claim fields
 
-Fields read by replace. Record: `copy_from` (`stock.<name>`) or wep (a .wep file), and the record as named tables: fires, handling, missile, clusters, mine, gun, strike, `jet_pack`; raw = { `[offset]` = value } for a field without a name. Behaviour: `on_fire`, `on_click`, `on_select`, `on_explode`, `on_place`, `on_proximity`, `eat_fire`, `click_finish`, `fire_repeat`, `stock_fire_choice`, airborne, actor, `is_weapon`. Art and sound: name, `panel_icon`, `panel_icons`, icon, sprites, `sprite_overrides`, sounds, hold, `worm_sprites`, `worm_sprites_animate`, `worm_sprites_toggle`, `worm_sprites_team_tint`, `mole_dig_rotation`; params for drawing (`gpu_prefix`, layer, depth, truecolor, `gpu_worm_sprites`, `worm_art`: the sheets of sprites a Lua actor draws in the worm's place, the worm in them, which glow with it, see [`a:gfx`](#agfx)).
+Fields read by replace. Record: `copy_from` (`stock.<name>`) or wep (a .wep file), and the record as named tables: fires, handling, missile, clusters, mine, gun, strike, `jet_pack`; raw = { `[offset]` = value } for a field without a name. Behaviour: `on_fire`, `on_click`, `on_select`, `on_explode`, `on_place`, `on_proximity`, `eat_fire`, `click_finish`, click (since 0.9.9: "homing", the cursor on selection, the click marks the target and Space fires, whatever the record; the `on_fire` event gets target = { x, y }), `fire_repeat`, `stock_fire_choice`, airborne, actor, `is_weapon`. Art and sound: name, `panel_icon`, `panel_icons`, icon, sprites, `sprite_overrides`, sounds, hold, `worm_sprites`, `worm_sprites_animate`, `worm_sprites_toggle`, `worm_sprites_team_tint`, `mole_dig_rotation`; params for drawing (`gpu_prefix`, layer, depth, truecolor, `gpu_worm_sprites`, `worm_art`: the sheets of sprites a Lua actor draws in the worm's place, the worm in them, which glow with it, see [`a:gfx`](#agfx)).
 
-Also: `wep`, `copy_from`, `fires`, `handling`, `missile`, `clusters`, `mine`, `gun`, `strike`, `jet_pack`, `raw`, `params`, `on_fire`, `on_click`, `on_select`, `on_explode`, `on_place`, `on_proximity`, `eat_fire`, `click_finish`, `fire_repeat`, `stock_fire_choice`, `airborne`, `is_weapon`, `name`, `panel_icon`, `panel_icons`, `sprite_overrides`, `truecolor`, `sounds`, `hold`, `worm_sprites`, `worm_sprites_animate`, `worm_sprites_toggle`, `worm_sprites_team_tint`, `gpu_worm_sprites`, `worm_art`, `mole_dig_rotation`
+Also: `wep`, `copy_from`, `fires`, `handling`, `missile`, `clusters`, `mine`, `gun`, `strike`, `jet_pack`, `raw`, `params`, `on_fire`, `on_click`, `on_select`, `on_explode`, `on_place`, `on_proximity`, `eat_fire`, `click_finish`, `click`, `fire_repeat`, `stock_fire_choice`, `airborne`, `is_weapon`, `name`, `panel_icon`, `panel_icons`, `sprite_overrides`, `truecolor`, `sounds`, `hold`, `worm_sprites`, `worm_sprites_animate`, `worm_sprites_toggle`, `worm_sprites_team_tint`, `gpu_worm_sprites`, `worm_art`, `mole_dig_rotation`
 
 ### `missile.trail.sprite`
 
@@ -315,6 +309,14 @@ Whether using it ends Invisibility: the team's, and the firing worm's own worm.i
 
 Also: `ends_invisibility`
 
+### `data.remembered`
+
+`remembered = true | false`
+
+Whether WA remembers the weapon for the worm that selected it: after a use the worm gets it back while it has ammo, and its next turn starts with it. WA's own pick of a weapon (a worm with nothing to keep) only chooses remembered weapons. Left out, the weapon's record: WA remembers 18 of its own (the Bazooka, Grenade, Uzi, Ninja Rope and others, not the Parachute, Jet Pack or Bungee), and every one with RubberWorm's Remember Weapons. A profile's value wins over both. The loader shows it as **Remember Weapon**.
+
+Also: `remembered`
+
 ## Worms
 
 Read and move worms, change their ammo, and hand them between WA and the pack.
@@ -353,11 +355,11 @@ Also: `worm.x`, `worm.y`, `worm.vx`, `worm.vy`, `worm.facing`, `worm.visible`, `
 
 `Worm fields (read only)`
 
-id, team, alliance, `ammo_group`, hp, kind, weapon (its id), turn, name, aim, `aim_target` (since 0.9.81: the aim the shot uses, which aim eases toward, in [`worm:input`](#worminput)'s degrees), aiming, drilling, state (standing, walking, ready, charging, prefiring, firing, fired, punching, drilling, teleporting, jetpacking, parachuting, sliding, roping, bungee, tumbling, frozen, kamikaze, `jump_prepare`, jumping, `jump_falling`, blasted, hit, and WA's own death: dying, drowning, dead; `nil` for any other WA state), `state_id`, `state_label`, keys, taken.
+id, team, alliance, `ammo_group`, hp, kind, weapon (its id), turn, name, aim, `aim_target` (since 0.9.81: the aim the shot uses, which aim eases toward, in [`worm:input`](#worminput)'s degrees), aiming, click (since 0.9.9: the click the cursor is up for on this turn's worm, "girder", "strike", "teleport" or "homing"; `nil` with no cursor up), target (since 0.9.9: { x, y }, the point the worm's last click marked), drilling, state (standing, walking, ready, charging, prefiring, firing, fired, punching, drilling, teleporting, jetpacking, parachuting, sliding, roping, bungee, tumbling, frozen, kamikaze, `jump_prepare`, jumping, `jump_falling`, blasted, hit, and its death: dying, drowning, dead; `nil` for any other WA state), `state_id`, `state_label`, keys, taken.
 
 Units: aim 0 (down) to 1 (up); `aim_target` degrees, -90 (down) to 90 (up), 0 level, relative to facing
 
-Also: `worm.aim`, `worm.aim_target`, `worm.aiming`, `worm.alliance`, `worm.ammo_group`, `worm.drilling`, `worm.hp`, `worm.id`, `worm.keys`, `worm.kind`, `worm.state`, `worm.state_id`, `worm.state_label`, `worm.taken`, `worm.team`, `worm.turn`, `worm.weapon`
+Also: `worm.aim`, `worm.aim_target`, `worm.aiming`, `worm.alliance`, `worm.ammo_group`, `worm.click`, `worm.drilling`, `worm.hp`, `worm.id`, `worm.keys`, `worm.kind`, `worm.state`, `worm.state_id`, `worm.state_label`, `worm.taken`, `worm.target`, `worm.team`, `worm.turn`, `worm.weapon`
 
 ### `worm:ammo`
 
@@ -523,7 +525,7 @@ Bodies the pack controls: spawn them, move them, draw them.
 
 `wa.actors.spawn{ sprite, x, y, ... }`
 
-Creates a native WA actor. body = { shape, hits, `hit_by`, [`pushed_by`](#bodypushed_by) } chooses its outline, outgoing movement, incoming attackers and how hard what runs into it pushes it, independently. A body uses the oil-drum layer (17). shape is worm (default), missile, sprite (registered sprite frame zero), or a pack-relative image path; a bare image uses no sprite slot and works with sprite=false. hits defaults to {}; `hit_by` defaults to `"all"`. Legacy collide, `collide_terrain`, `collide_worms`, `as_object`, shape, solid and mask options are accepted only without body. Other keys: sprite, x, y, vx, vy, from, origin, owner, gravity, `damage_terrain`, `damage_worms`, drown, persist, visible, loop, [`on_explode`](#claim-fields), on = { frame, land, hit, contact, bump }.
+Creates a native WA actor. body = { shape, hits, `hit_by`, [`pushed_by`](#bodypushed_by) } chooses its outline, outgoing movement, incoming attackers and how hard what runs into it pushes it, independently. A body uses the oil-drum layer (17). shape is worm (default), missile, sprite (registered sprite frame zero), or a pack-relative image path; a bare image uses no sprite slot and works with sprite=false. hits defaults to {}; `hit_by` defaults to `"all"`. Legacy collide, `collide_terrain`, `collide_worms`, `as_object`, shape, solid and mask options are accepted only without body. Other keys: sprite, x, y, vx, vy, from, origin, owner, gravity, `damage_terrain`, `damage_worms`, drown, persist, visible, loop, [`on_explode`](#claim-fields), on = { frame, land, hit, contact, bump }. owner is a worm or actor; left out, a simulation callback's own worm or actor. `owner = "none"` spawns an actor of no team (Project X's team 0), as one whose owner WA freed: what it fires, launches, lays or blasts is no team's. Without either, the spawn errors; `owner = "none"` takes no cluster.
 
 Units: position px
 
@@ -561,7 +563,7 @@ Also: `body.hit_by`, `body.shape`
 
 `body = { pushed_by = { mines = 0.2 } }`
 
-How hard what runs into the actor pushes it. When a body WA moves runs into the actor, WA trades their speeds; the actor keeps this share (0 to 1) of the speed it was given, and the mover keeps the speed WA left it, so it slows against the actor instead of bouncing off. Keys: worms, missiles, arrows, mines (every WA mine, the level's as much as a laid one), actors; one left out keeps WA's whole push. Blasts, guns and other hits are not affected: they still reach the actor through `on.hit`. Set at spawn. A sprite-shaped actor with on.contact gets no push from WA to scale. The Electromagnet's "Mines push the magnet" option uses it.
+How hard what runs into the actor pushes it. When a body WA moves runs into the actor, WA trades their speeds; the actor keeps this share (0 to 1) of the speed it was given, and the mover keeps the speed WA left it, so it slows against the actor instead of bouncing off. Keys: worms, missiles, arrows, mines (every WA mine, the level's as much as a laid one), actors; one left out keeps WA's whole push. Blasts, guns and other hits are not affected: they still reach the actor through `on.hit`. Set at spawn. A sprite-shaped actor with on.contact gets no push from WA to scale. The Electromagnet sets mines and missiles to 0, so nothing its field drags can knock it away.
 
 Units: share 0..1
 
@@ -987,13 +989,19 @@ Units: frames
 
 `wa.world.keys()`
 
-The synced keys: left, right, up, down, jump, shift (sprint is its old name), q, space, ctrl, `plus_key`, `minus_key`, alt, `pause_key`, digit.
+The synced keys: left, right, up, down, jump, shift (sprint is its old name), q, space, ctrl, `plus_key`, `minus_key`, alt, `pause_key`, tab, digit. None is held while the chat box or the Esc menu is open, or WA isn't the window in front.
 
 ### `wa.world.networked`
 
 `wa.world.networked()`
 
 Whether the match is online.
+
+### `wa.world.worm_selecting`
+
+`wa.world.worm_selecting()`
+
+Whether WA is picking worms now, so Tab switches worms (the scheme's worm select, until the worm moves; all turn under "worm select always"). Outside it, Tab is free for a pack.
 
 ### `wa.world.is_local_alliance`
 
@@ -1290,6 +1298,16 @@ Turns on the FPS counter for the match: this machine's frame rate over the last 
 WA's top-centre banner, as selecting a weapon shows it: one line of at most 127 bytes. to is `"all"` (default), `"active"` (the player whose turn it is) or `"coalition"` (the active team's, or alliance 0-5). Call from simulation events.
 
 Also: `message_top`
+
+### `wa.hud.tray`
+
+`wa.hud.tray.add{ weapon, team, key, to, lit, progress }`
+
+Puts a team's weapon in the HUD tray: cells at the top right in the weapon panel's look (icon, the team's ammo and delay), oldest at the right, each sliding in. `key` (up to 8 bytes) shows in a strip under the cell. Shown only on that team's turn, to `to` (coalition by default, active, all). Adding it again returns the same entry. The handle's `set{ key, lit, progress }` changes what it names; lit draws a yellow border and holds the entry, progress (0..1) a bar along its bottom. `remove()`, `is_open()`. Dropped once the team has none left, unless lit. Drawn over the fog and WA's HUD on the GPU layer (`Direct3D` 9 shader), never rippled or zoomed; the FPS counter sits under it. At most 32.
+
+Units: px
+
+Also: `hud.tray`
 
 ### `wa.hud.window`
 

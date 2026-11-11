@@ -150,7 +150,7 @@ What runs into a mine-physics actor pushes it, as mines push each other: WA
 trades their speeds. `body.pushed_by = { mines = 0.2 }` keeps only that share
 of the push, here a fifth of what a mine gives it (keys `worms`, `missiles`,
 `arrows`, `mines`, `actors`; 0 is no push, 1 the full push). The Electromagnet
-uses it so the mines it pulls in can't knock it away.
+sets `{ mines = 0, missiles = 0 }`, so nothing its field drags can knock it away.
 
 Anything that drives itself wants a plain `body` (first row of the table):
 with mine physics, friction and settling eat the small speed a steering
