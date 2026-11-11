@@ -5,7 +5,7 @@ WormForge. Part 1 builds one small weapon from an empty folder, plays it, and
 sets out the few rules every mod follows. The later parts go deeper, one
 subject each.
 
-The weapon is the **Moon Grenade**: A copy of WA's Grenade with about a third of the
+The weapon is the **Moon Grenade**: A copy of the stock Grenade with about a third of the
 gravity and a small burst, which digs three craters in the ground below it.
 The finished mod is [examples/starting_guide](https://github.com/EdLud/WormForge-mods/tree/main/examples/starting_guide)
 in the mods repository.
@@ -75,7 +75,7 @@ If WA's folder can't be written to (an install under Program Files), the
 ### wf-lib belongs to the loader
 
 **Install** and **Update all** put each mod from the online catalogue in a
-folder of its own in `Mods/wf-lib/`, and remember every file they wrote.
+folder of its own in `Mods/wf-lib/`.
 
 - **Make your own mod beside `wf-lib`, never inside it,** under an id of
   your own. The catalogue's installs and updates never touch such a mod.
@@ -128,7 +128,7 @@ format_version = 2
 id = "guide.moon_grenade"
 type = "weapon"
 name = "Moon Grenade"
-description = "WA's Grenade with about a third of the gravity and a small burst, which digs three craters in the ground below it."
+description = "The stock Grenade with about a third of the gravity and a small burst, which digs three craters in the ground below it."
 entry = "weapons/moon_grenade.lua"
 icon = "grenade"
 default_position = { row = "F2", column = 6 }
@@ -140,7 +140,7 @@ default_position = { row = "F2", column = 6 }
 | `name`, `version`, `author` | What the loader shows on the mod's card. |
 | `api_version`, `format_version` | `4` and `2`: the Lua API and the `mod.toml` format the mod is written for. WormForge refuses a mod written for others, and says why. |
 | `[[components]]` | One block per weapon or feature. |
-| component `id` | Unique among all installed mods: up to 64 lowercase letters, digits, `.`, `_` and `-`. `stock.` is taken: it names WA's own weapons. Start yours with something of your own, as `guide.` here. |
+| component `id` | Unique among all installed mods: up to 64 lowercase letters, digits, `.`, `_` and `-`. `stock.` is taken: it names the stock weapons. Start yours with something of your own, as `guide.` here. |
 | `type` | `"weapon"` or `"feature"`. |
 | `name` | What players read, in the loader and, for a weapon, in the game. |
 | `description` | A sentence for the loader. |
@@ -157,7 +157,7 @@ A component's file runs when a match loads, and returns what the component
 is. For a weapon, that is a table with two keys:
 
 ```lua
--- Moon Grenade: WA's Grenade with about a third of the gravity and a small
+-- Moon Grenade: the stock Grenade with about a third of the gravity and a small
 -- burst, which digs three craters in the ground below it.
 
 return {
@@ -178,14 +178,12 @@ return {
       },
 
       -- Simulation: runs on every player's machine at the same moment,
-      -- so it may change the game and roll WA's dice.
+      -- so it may change the game.
       on_explode = function(ev)
-        -- One crater down-right, one straight down, one down-left. The dice
-        -- pick each one's angle within its part (0 degrees is right, 90 is
-        -- straight down), its distance and its size.
+        -- One crater down-right, one straight down, one down-left with some randomness added in.
         for i = 0, 2 do
           local angle = math.rad(20 + 60 * i + wa.random(0, 20))
-          local distance = wa.random(60, 85)
+          local distance = wa.random(60, 85) -- same result on all machines
           wa.land.cut{
             x = ev.x + distance * wa.math.cos(angle),
             y = ev.y + distance * wa.math.sin(angle),
@@ -209,7 +207,7 @@ return {
 ```
 
 - `defaults` is the weapon's **data**: here, three Moon Grenades at the start
-  of a round (`-1` would be infinite). Players change it for their profile
+  of a round. Players change it for their profile
   in the loader's **Manage Weapon Panel**, and what they set is laid over
   your defaults, field by field. Part 2 lists every field.
 - `install` builds the weapon. `wa` is for `install` and what it sets up:
@@ -217,8 +215,8 @@ return {
   refused. `install` also receives a `ctx` table, with where the weapon was
   placed and its data; part 2 covers it.
 - `wa.weapons.replace{ ... }` makes the weapon. `copy_from = "stock.grenade"`
-  starts from WA's Grenade, and `missile` changes two of its settings: 35% of
-  WA's gravity, and an explosion of power 20 where WA's Grenade has 50. Power
+  starts from the stock Grenade, and `missile` changes two of its settings: 35% of
+  normal gravity, and an explosion of power 20 where the stock Grenade has 50. Power
   is both the damage and the size of the blast. Everything not named stays as the
   Grenade's Weapon Record sets it. [Weapon records](weapon-records.md) lists what can be changed.
 - `on_explode` runs where the grenade bursts, with its position in `ev.x`,
@@ -239,7 +237,7 @@ weapon it copies. Part 2 gives it one of its own.
 to try it:
 
 ```toml
-description = "The starting guide's Moon Grenade, with WA's Grenade beside it to compare, a Ninja Rope and Skip Go."
+description = "The starting guide's Moon Grenade, with the stock Grenade beside it to compare, a Ninja Rope and Skip Go."
 
 [weapons]
 "guide.moon_grenade" = true
@@ -252,15 +250,15 @@ ammo = -1
 ```
 
 - `[weapons]` is the panel. `true` puts a weapon at its default position; a
-  profile saved by the loader gives each one a row and a column instead. WA's
-  own weapons are listed the same way, by id.
+  profile saved by the loader gives each one a row and a column instead. The
+  stock weapons are listed the same way, by id.
 - A profile that lists weapons owns the whole panel: the weapons it doesn't
   list aren't in the game. This one has four.
 - `[weapon_settings."stock.ninja_rope"]` gives the rope infinite ammo
   (`-1`). The Moon Grenade has no settings here, so it keeps its defaults:
   three.
-- A profile also holds WA's game scheme. This one sets none of it, so it
-  plays Intermediate's settings, whatever scheme the lobby shows.
+- A profile also holds WSC settings. This one sets none, so it plays
+  Intermediate's settings, whatever scheme the lobby shows.
 
 ## Try it
 
@@ -276,7 +274,7 @@ ammo = -1
    lobby's weapon settings*.
 5. Press F2 until the Moon Grenade is selected, and throw it at the ground.
    It floats, bursts small, and three craters open in the land below it.
-   The screen shows *Moon Grenade: craters below ...*. Throw WA's Grenade
+   The screen shows *Moon Grenade: craters below ...*. Throw the stock Grenade
    beside it to compare the blasts.
 
 To use the Moon Grenade in another profile, open the loader's **Manage
@@ -331,10 +329,10 @@ The other players don't need your mod installed:
 
 ## Three rules
 
-### 1. A weapon is an id, never a slot
+### 1. Every weapon needs an ID
 
 WA numbers its weapons by slot. WormForge keeps those numbers away from
-Lua: a weapon is its **id**. `stock.grenade` is WA's Grenade,
+Lua: a weapon is its **id**. `stock.grenade` is the stock Grenade,
 `guide.moon_grenade` is yours. The profile decides where a weapon sits, so
 the same file works wherever a player puts it, next to any other mod's
 weapons. Wherever Lua names a weapon, it uses the id: `copy_from`, a
@@ -360,13 +358,11 @@ out the same on every machine. WormForge splits your code in two:
   may read anything and change nothing: WormForge refuses a change to the
   game from them, with an error.
 
-The Moon Grenade does both: `on_explode` rolls the dice, cuts the land and
+The Moon Grenade does both: `on_explode` cuts the land and
 records `last_burst`; the HUD only reads it.
 
-What goes with it:
-
-- **Dice:** `wa.random(n)` gives a whole number from 1 to n from WA's own
-  dice, the same on every machine and in replays. Simulation only. Lua's
+- **wa.random:** `wa.random(n)` gives a whole number from 1 to n from WA's
+  random function, the same on every machine and in replays. Simulation only. Lua's
   `math.random` is gone; for looks, in drawing, `wa.draw.random()` gives a
   number from 0 to 1.
 - **Angles:** where the result reaches the game, use `wa.math.sin`,
@@ -392,9 +388,9 @@ What goes with it:
 > ```
 >
 > - PX hooks every worm's shot and asks which weapon it is by its name. In
->   WormForge the code sits in the weapon's own file, and a weapon is named
+>   WormForge the code sits in the weapon's file, and a weapon is named
 >   by its id, which stays the same whatever the weapon is called.
-> - `GS->GetRandom()` is WA's dice, as `wa.random` is.
+> - `GS->GetRandom()` is WA's randomness, as `wa.random` is.
 > - `Render()` is drawing, as `wa.on.draw` and `wa.on.hud` are.
 > - PX's `float` was already WA's units counted in pixels: `SpY = -9` there
 >   is a speed of `-9` here too.

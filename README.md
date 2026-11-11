@@ -6,17 +6,17 @@
 
 <a href="https://github.com/EdLud/WormForge/releases">Download</a>
 
-<a href="https://github.com/ropahektic/WormForge-engine">Engine Repo</a> 
+<a href="https://github.com/EdLud/WormForgeNew">Engine Repo</a> 
 
 WormForge is a Lua modding layer for WA 3.8.1 that lets you code custom weapon and scheme behaviour.
 
-You don’t need to be a C++ reverse engineer or even a programmer to ship something. Read the [guides](docs/starting-guide-1-your-first-mod.md), drop a folder under `Mods/`, pick its weapons and add-ons for your profile in the mod loader and you’re in. The module ships working examples — Highlander rules with a full custom weapon arsenal, turrets, swimming worms, worm toss, random sprite swaps, inventory demos, custom vehicles and much much more — so you can learn and/or copy.
+If you are interested in modding, read the [guides](docs/starting-guide-1-your-first-mod.md), drop a folder under `Mods/`, pick its weapons and add-ons for your profile in the mod loader and you’re in.
 
 Replays and WormNET are supported out of the box. Start from the [site](https://edlud.github.io/WormForge), check [features](docs/verbs.md), grab a [build](https://github.com/EdLud/WormForge/releases), enable an example, and see how far past “just another scheme” you can push a match or improve existing schemes.
 
 **INSTALL:** Drop `wkLua.dll` next to `WA.exe`, click **Check Online** and **Install**.
 
-**REQUIRES:** Windows 10 or later (or Wine/CrossOver), WormKit, Direct3D 9 (shader). Some WormKit modules clash with WormForge: [Requirements and compatibility](docs/requirements.md)
+**REQUIRES:** Windows 7 or later (or Wine/CrossOver), WormKit, Direct3D 9 (shader). Some WormKit modules clash with WormForge: [Requirements and compatibility](docs/requirements.md)
 
 **STATUS:** Stable, but replay backwards compatibility is not yet guaranteed.
 
@@ -34,7 +34,7 @@ The mod loader shows who made each weapon. If a name is missing or wrong, please
 
 **Code and ideas from other WormKit modules:**
 
-- [wkVista](https://github.com/ropahektic/wkVista) by [Ropa](https://github.com/ropahektic/) (MIT): full-colour maps and zoom, rebuilt on WormForge's own renderer
+- [wkVista](https://github.com/ropahektic/wkVista) by [Ropa](https://github.com/ropahektic/) (MIT): full-colour maps and zoom, rebuilt on WormForge's renderer
 - [wkZoom](https://github.com/ConnerPetzold/wkZoom) by [Syc](https://github.com/ConnerPetzold/), used with permission: smooth zoom
 - [wkJellyWorm](https://github.com/rm-rf-worms/wkJellyWorm) by [nizikawa](https://github.com/rm-rf-worms), with [JSG](https://github.com/jsgnextortex/)'s improvements in [wkJollyWorm](https://github.com/jsgnextortex/wkJellyWorm/tree/Wkjollyworm): weapon-record research
 - [wkRGBA](https://github.com/rUNaW4y/wkRGBA) by [rUNaW4y](https://github.com/rUNaW4y): the idea of giving WA a proxy map, so a full-colour map still plays and replays without the module

@@ -1,9 +1,9 @@
 # Moving actors
 
-An **actor** is anything a pack spawns with `wa.actors.spawn`: a bee, a
+An **actor** is anything a mod spawns with `wa.actors.spawn`: a bee, a
 turret, a bouncing ball, a shell casing. This page is about how it moves and
-how it learns what it ran into. The short version: decide **who moves it**,
-WA or your Lua, and never both.
+how it learns what it ran into. In short: decide **who moves it**, WA or
+your Lua, never both.
 
 ## Who moves your actor
 
@@ -14,7 +14,7 @@ WA or your Lua, and never both.
 | is decoration and touches nothing | no `body`, `collide = false`, `gravity = false` | your Lua: `a:gravity()` and `a:move{}` each frame | a shell casing |
 
 **WA moves any actor that collides with something or has gravity.** Every
-frame, before your `frame` callback runs, WA's own collision code moves it by
+frame, before your `frame` callback runs, WA's collision code moves it by
 its speed. That is the code that moves mines, grenades and worms: it steps
 pixel by pixel, stops the actor at land and at whatever its `body.hits`
 allows, and never lets it sink into terrain.
@@ -22,7 +22,7 @@ allows, and never lets it sink into terrain.
 **WA does not move an actor that collides with nothing and has no gravity.**
 Nothing moves it unless your Lua does.
 
-### Don't add a second step
+### One step per frame
 
 `a:move{ terrain = true, worms = false }` is not WA's collision code. It adds
 the actor's speed to its position once, and reports whether there is land
@@ -52,14 +52,14 @@ wa.actors.spawn{
 }
 ```
 
-- `body.hits` is what the actor's own movement stops on: `land`, `worms`,
+- `body.hits` is what the actor stops on when it moves: `land`, `worms`,
   `mines`, `crates`, `objects` (oil drums and other bodies), `missiles`.
 - `body.hit_by` is what may hit it: blasts, fire, arrows and so on.
-- `body.shape` is its outline: a pack image path, `"worm"` (default),
+- `body.shape` is its outline: an image path in the mod, `"worm"` (default),
   `"missile"`, or `"sprite"`.
 - To jump an actor WA moves to another place, use `a:warp{ x, y, vx, vy }`
-  rather than writing `a.x`, `a.y`: it also resets WA's "at rest" state and
-  keeps the actor from being drawn sliding across.
+  rather than writing `a.x`, `a.y`: it also resets WA's "at rest" state, so
+  the actor isn't drawn sliding across.
 
 ## What did it run into?
 
@@ -67,7 +67,7 @@ Three tools, for three questions:
 
 | Question | Tool |
 |---|---|
-| My own movement ran into something: what, from which side, how fast? | `on.bump` |
+| My actor ran into something: what, from which side, how fast? | `on.bump` |
 | Something moving ran into me: a missile, a worm, a rolling ball | `on.contact` |
 | Would I fit at this spot, before I go there? | `a:fits(x, y)` |
 
@@ -102,10 +102,10 @@ then up or down, and bounces it on the axis it was stopped on. So `ev.nx`,
 `ev.ny` is always straight: `(0, -1)` a floor, `(0, 1)` a ceiling, `(1, 0)`
 or `(-1, 0)` a wall. On a hillside that is "floor", not the hill's angle.
 
-For the angle, `ev.surface_nx`, `ev.surface_ny` comes from WA's own gradient
-routine, the one WA uses to tilt a mine lying on a slope: it needs land right
-under the actor and measures the floor's height a few pixels to each side. So
-it exists for floors only. Walls, ceilings and bumps into worms or objects
+For the angle, `ev.surface_nx`, `ev.surface_ny` comes from the routine WA
+uses to tilt a mine lying on a slope: it needs land right under the actor
+and measures the floor's height a few pixels to each side. So it exists for
+floors only. Walls, ceilings and bumps into worms or objects
 don't have it.
 
 A ball that bounces off everything at a steady speed, using the slope where
@@ -149,13 +149,12 @@ like a turret.
 What runs into a mine-physics actor pushes it, as mines push each other: WA
 trades their speeds. `body.pushed_by = { mines = 0.2 }` keeps only that share
 of the push, here a fifth of what a mine gives it (keys `worms`, `missiles`,
-`arrows`, `mines`, `actors`; 0 none, 1 WA's whole push). The Electromagnet
+`arrows`, `mines`, `actors`; 0 is no push, 1 the full push). The Electromagnet
 uses it so the mines it pulls in can't knock it away.
 
-It is wrong for anything that drives itself: friction and settling eat the
-small speed a steering brain adds each frame, and the actor crawls whatever
-speed you ask for. A flier or walker wants a plain `body` (first row of the
-table).
+Anything that drives itself wants a plain `body` (first row of the table):
+with mine physics, friction and settling eat the small speed a steering
+brain adds each frame, and the actor crawls whatever speed you ask for.
 
 ## Online play
 
@@ -165,14 +164,12 @@ the same on every machine:
 
 - `frame`, `bump`, `contact` and `hit` are simulation callbacks: they run on
   every machine in the same order, and may change speed, position, health.
-- `wa.on.draw` and `wa.on.hud` run on one machine only, to draw: they may not
-  change the game.
+- `wa.on.draw` and `wa.on.hud` run on each machine for itself, to draw: they
+  only read the game.
 - Use `wa.random` and `wa.math.sin` / `cos` / `atan`, not Lua's `math.random`
   or `math.sin`, which can differ between machines.
 
 ## See also
 
-- `contributing-with-an-agent.md` in the engine repository: the full field
-  lists for `wa.actors.spawn`, `body`, `on.bump` and `on.contact`.
 - The [verb list](verbs.md#onbump): every `wa` function.
-- [Weapon records](weapon-records.md): how a weapon's own projectiles behave.
+- [Weapon records](weapon-records.md): how a weapon's projectiles behave.

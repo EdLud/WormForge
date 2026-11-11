@@ -22,10 +22,10 @@ These WormKit modules don't work:
 folder before playing online with WormForge.**
 
 
-### wkFOW: use WormForge's own fog of war instead
+### wkFOW: use WormForge's fog of war instead
 
 wkFOW draws in the same places WormForge does, and WormForge then turns its
-own drawing off (`wkLua.log` says "bytes differ"). WormForge has fog of war
+drawing off (`wkLua.log` says "bytes differ"). WormForge has fog of war
 built in: select the **Fog of war** add-on in a profile.
 
 ### wkZoom: not yet supported

@@ -1,13 +1,13 @@
 # Weapon records
 
 A **record** is WA's built-in description of a weapon: how it fires, how its
-projectiles behave, and which sounds and sprites it uses. WormForge exposes
-these settings as named Lua tables. The names describe behaviour established
-through reverse engineering; some native parameters remain unresolved.
+projectiles behave, and which sounds and sprites it uses. WormForge gives
+these settings names in Lua tables. The names come from reverse engineering,
+and some native parameters are still unknown.
 
-A Project X `.wep` file stores this weapon data together with PX metadata.
-Importing it supplies the firing behaviour and a default name. Supply custom
-art and Lua behaviour through the bundle's usual declarations and callbacks.
+A Project X `.wep` file holds this data. Importing one gives the weapon its
+firing behaviour and a default name; art and Lua behaviour come from the
+mod's usual declarations and callbacks.
 
 ## Start with an existing weapon
 
@@ -75,7 +75,8 @@ Enum fields accept the names shown below or native integer values.
 | `fires.type`, `fires.method` | Native firing-family and method selectors. Normally inherit them from the base. |
 | `fires.subtype` | Family-dependent native parameter. Selects a special weapon's particular behaviour; no gameplay use has been identified for strikes. Normally inherit it from the base. |
 | `fires.creates_projectile` | Native firing flag. Its detailed effect is not fully documented; inherit it. |
-| `handling.remember_selection` | Whether WA remembers and may re-equip this weapon between turns. Does not enable a crosshair. |
+| `handling.available_in_caves` | Whether the weapon can be used on cavern maps; also controls cave-round ammo/crate exclusion. |
+| `handling.remember_selection` | Whether WA remembers and may re-equip this weapon between turns. Does not enable a crosshair. Weapon data's and the profile's `remembered` sets it. |
 | `handling.shots` | Number of uses in a firing sequence, such as the Shotgun's two shots. |
 | `handling.ends_turn` | Whether using the weapon ends weapon use for the turn. |
 | `handling.retreat` | Native retreat-time setting in milliseconds; preserve inherited special values unless tested. |
@@ -112,7 +113,7 @@ Fields below belong under `missile` unless another table is named.
 | `fire.burn_time_ms` | With `burst = "fire"`, nominal settled burn time for ordinary fire. Falling pauses natural decay, and native randomness can shorten the burn. Persistent native fire modes consume this reserve on hits instead. This is not an exact lifetime from creation; `0` does not mean unlimited. |
 | `fire.spread_generations` | With `burst = "fire"`, nonnegative whole number of successive spreading generations. `0` retains only the initial flames. Each generation may branch into several flames; this is not a flame count. |
 | `fire.decay_mode` | With `burst = "fire"`, `"resting"` consumes the burn reserve while settled; `"on_hit"` consumes it through hits instead. Water and other native extinguishing rules still apply. |
-| `explosion.power` | Combined explosion damage and radius, as in WA's weapon power. |
+| `explosion.power` | Explosion damage and radius together, as a WA weapon's power. |
 | `explosion.push_pct` | Knockback percentage. Zero removes push while retaining explosion power. |
 | `explosion.bias`, `explosion.variation` | Native explosion bias and damage variation. |
 | `sprite`, `animation` | Flight sprite and native animation selector. |
@@ -132,7 +133,7 @@ These groups belong under `missile` and require the matching `action`.
 
 | Group | Fields and meaning |
 |---|---|
-| `bounce` | `bounciness`: extra bounce relative to WA's Grenade (`0`); Banana Bomb uses `60`. `terrain_keep_speed_pct`: percentage of speed retained on terrain contact. `sound`: bounce sound. `max_bounces`: bounce limit; `0` leaves the normal fuse behaviour. |
+| `bounce` | `bounciness`: extra bounce relative to the stock Grenade (`0`); Banana Bomb uses `60`. `terrain_keep_speed_pct`: percentage of speed retained on terrain contact. `sound`: bounce sound. `max_bounces`: bounce limit; `0` leaves the normal fuse behaviour. |
 | `bounce` | `hits`: named targets for physical collisions, added to `ends_on_contact`. `explosion = { bias, push_pct, power, variation }`: the bounce action's contact-explosion parameters. |
 | `bounce` | `contact_sides`: native contact-side bitmask controlling which contacts count toward the bounce limit and trigger contact explosions. Separate from object collision flags. `extra_reverse_chance_pct`: percentage chance of an additional horizontal reversal and a kick based on vertical speed, before normal collision processing. |
 | `homing` | `kind`: `"off"`, `"lock"` or `"dodge"`. `arm`, `time`: arming delay and homing duration in milliseconds. `sprite`, `animation`, `trail = { sprite, power, speed, bubbles_per_second }`: presentation during homing. |
@@ -186,12 +187,10 @@ Do not combine `worms` with its four constituent ordinary groups in one table.
 Unmapped imported bits can be preserved with `extra_bits`; shipped PX masks
 need no such values.
 
-The former numeric spellings `collides`, `bounce.flags`,
-`roam.movement_flags`, `roam.explode_flags` and `gun.hit_flags` remain accepted
-and readable for compatibility. Do not combine a numeric alias with its new
-name, or with `impact_particles` when they share the same native word.
-`mine.detects` accepts named targets while retaining its existing numeric
-readback through `wa.weapons.data`.
+Older ports may use the numeric `collides`, `bounce.flags`,
+`roam.movement_flags`, `roam.explode_flags` and `gun.hit_flags`; they still
+work, but not together with the named field or with `impact_particles`.
+`wa.weapons.data` reads `mine.detects` back as a number.
 
 ### Clusters
 
@@ -218,6 +217,8 @@ the fire names. Inherit untested native decay-mode numbers from the base.
 
 | Group | Fields and meaning |
 |---|---|
+| `arrow` | `damage`: native arrow hit damage (Longbow firing). |
+| `baseball_bat` | `damage`: hit damage. `knockback_scale`: multiplier applied to the native firing vector, in steps of `0.1`. |
 | `gun` | `bullets`: rounds in the firing sequence. `shot_interval_ms`: interval between rounds. `burst_size`: projectiles emitted per round. `spread_deg`, `burst_spread_deg`: angular spread, centred on the aim. |
 | `gun` | `damage`: damage per projectile. `hits`: named raycast targets. `impact_effect`: native visual effect selector. `explosion = { bias, push_pct, variation }`: impact parameters. |
 | `mine` | `proximity`: detection radius. `arm`: arming delay in milliseconds. `detects`: named proximity targets. `fuse`: triggered fuse in milliseconds. `explosion = { bias, push_pct, power }`: explosion parameters. |
@@ -235,8 +236,20 @@ uses the separate declarations `sprite`, `cluster.sprite`, `plane`,
 `sheep_sprites`, `worm_sprites` and `hold`. For example, a bundle's flight
 sheet goes in top-level `sprite`, rather than `missile.sprite`.
 
+During weapon installation, `missile.trail.sprite` also accepts a pack image
+path, such as `"sprites/tele_arrow/trail.png"`. Its sheet is loaded for that
+weapon and written to its native trail field; other weapons keep their own
+trails. Declare `frames` in `mod.toml` for a strip. This installs an image;
+per-shot `wa.weapons.launch` overrides still use sprite names or numeric IDs.
+
 The weapon name, panel icon, ammo/crate defaults, component options and Lua
-callbacks also use their own declarations, as the bundle guide describes.
+callbacks also use their own declarations. See the
+[starting guide](starting-guide-1-your-first-mod.md).
+
+Profiles may override these same named fields under
+`[weapon_settings."<id>".record]`, including stock weapons. Their callbacks
+and art stay; the change applies only to matches with that profile.
+
 
 ## Reading and per-shot overrides
 
@@ -248,9 +261,9 @@ local family = data.fires.as  -- read-only family name
 
 Use a placed weapon's ID to read its current match record. This includes
 `stock.<name>` when that stock weapon is placed; otherwise a stock ID reads
-WA's untouched template. Read after the match's weapon table is ready. The
-returned table is a snapshot; editing it changes no weapon. Only settings
-appropriate to the record's family, action and payload are returned.
+the unchanged stock record. Read it once the weapons of the match are set
+up. The table is a copy; editing it changes no weapon. It holds only the
+settings that fit the record's family, action and payload.
 
 In a simulation callback with a firing event `ev`:
 
@@ -270,7 +283,41 @@ Scripted children inherit the source weapon's missile settings, independently
 of `clusters.bit`. Override child-specific fuse, Space detonation and payload
 settings in the launch, as [Chilli Bomb](https://github.com/EdLud/WormForge-mods/blob/main/px/weapons/chilli_bomb.lua) does.
 
-Unresolved settings remain accessible through `raw` for existing ports and
-advanced experimentation. Prefer named fields wherever available. A field
-having a name does not mean every native flag, sentinel or interaction has
-been fully documented.
+Settings without a name are reachable through `raw`, for older ports and
+experiments. Use the named fields where they exist; a name doesn't mean
+every native flag and interaction is understood.
+
+## Separate projectile records
+
+A gun may use its normal firing sequence to launch a different kind of missile:
+
+```lua
+wa.weapons.replace{
+  copy_from = "stock.minigun",
+  gun = {bullets = 25},
+  projectile = {
+    copy_from = "stock.grenade",
+    sprite = "sprites/cloud.png",
+    missile = {fuse = 5000, explosion = {power = 0}},
+    clusters = {count = 1, bit = {explosion = {power = 18}}},
+  },
+  on_fire = function(ev)
+    wa.weapons.launch{weapon = ctx.id, owner = ev.worm,
+      x = ev.x, y = ev.y, vx = 8, vy = -4}
+  end,
+}
+```
+
+`projectile` is an internal launch record, with no panel entry or separate ammo.
+It requires a stock `copy_from` that builds a missile. Its `fires`, `missile`,
+`clusters`, `sprite`, `cluster`, `sprites` and `params` use the usual declaration
+format. Handling and callbacks stay on the main weapon. Nested projectiles are
+not supported. `wa.weapons.launch` uses this record automatically and applies
+its per-shot overrides to a private copy; ordinary weapons keep their existing
+launch behavior. Native gun timing and interruptions remain on the main record.
+Missile events retain the owning component's id, including native cluster bits.
+`wa.weapons.data` reads the main weapon record.
+
+Both `missile.trail.sprite` and `clusters.bit.trail.sprite` accept pack-relative
+image paths for scoped native trails. Their art uses the existing visual trail
+path; no scripted movement or additional simulation actors are needed.
