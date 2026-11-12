@@ -185,13 +185,23 @@ Also: `shots`
 
 ### `data.rope_length`
 
-`rope_length = 200`
+`rope_length = 400`
 
-The Ninja Rope's maximum length in pixels, up to 535. Unset, the rope's scheme power gives it, with its shots: power 0 one shot of 147 px, 1 two of 168, 2 two of 189, 3 four of 210, more unlimited of 231.
+The Ninja Rope's maximum length in pixels, up to 1071: how far its shot reaches and how far it pays out while hanging. Unset, the rope's scheme power gives it, with its shots and angle: power 0 one shot of 294 px within 45°, 1 two of 336 within 45°, 2 two of 378 within 90°, 3 four of 420 within 90°, more unlimited of 462 within 90°. Up to 0.9.9 the length was read as half its pixels: double an older value.
 
 Units: px
 
 Also: `rope_length`
+
+### `data.rope_angle`
+
+`rope_angle = 45`
+
+How far from straight up the Ninja Rope aims: `45`, `90` or `144` degrees. Unset, the rope's scheme power gives it (Intermediate's 90).
+
+Units: degrees
+
+Also: `rope_angle`
 
 ### `data.mid_air`
 
