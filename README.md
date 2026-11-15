@@ -24,7 +24,7 @@ Replays and WormNET are supported out of the box. Start from the [site](https://
 
 ## Credits
 
-Originally created by [ropahektic](https://github.com/ropahektic/), now maintained by [EdLud](https://github.com/EdLud), with contributions from [reddaz](https://github.com/reddazxfi).
+By [EdLud](https://github.com/EdLud), with contributions from [reddaz](https://github.com/reddazxfi).
 
 **Project X.** The Project X ports bring PX's weapons, rules and art to WormForge. Project X is by Entuser and many authors. Each port is credited to the authors its PX scripts name:
 
